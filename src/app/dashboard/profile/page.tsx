@@ -1,6 +1,6 @@
 import { ProfileForm } from "./ProfileForm";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Page from "@/components/Page";
 

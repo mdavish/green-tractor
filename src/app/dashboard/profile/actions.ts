@@ -2,7 +2,7 @@
 import { prisma } from "@/lib/prisma";
 import { type ProfileFormValues } from "./schema";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions"; 
+import { authOptions } from "@/lib/auth"; 
 import { revalidatePath } from "next/cache";
 
 export default async function updateProfile({name, profile}: ProfileFormValues) {

@@ -2,6 +2,7 @@ import { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -17,3 +18,13 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 };
+
+export async function getCurrentUser()  {
+  const session = await getServerSession(authOptions);
+  if (!session) return null
+  const currentUserEmail = session.user?.email!;
+  const currentUser = await prisma.user.findUnique({
+    where: { email: currentUserEmail },
+  });
+  return currentUser
+}
