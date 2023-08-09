@@ -1,13 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FormField, Form, FormItem, FormControl } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTransition } from "react";
 import joinWaitlist from "@/actions/joinWaitlist";
 import { useToast } from "@/components/ui/use-toast";
+import { signIn } from "next-auth/react";
 
 export default function Home() {
   const { toast } = useToast();
@@ -51,31 +50,9 @@ export default function Home() {
           Green Tractor makes it easy to buy and sell farm equipment, seeds, and
           more.
         </p>
-        <Form {...form}>
-          <form
-            className="mx-auto flex flex-row gap-x-4"
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="email"
-                      placeholder="Join the waitlist..."
-                    ></Input>
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <Button type="submit">
-              {isPending ? "Submitting..." : "Join"}
-            </Button>
-          </form>
-        </Form>
+        <Button className="w-fit mx-auto" onClick={() => signIn()}>
+          Sign In
+        </Button>
       </div>
     </main>
   );
