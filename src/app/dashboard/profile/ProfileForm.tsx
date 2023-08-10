@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { useTransition } from "react";
-import updateProfile from "./actions";
+import updateProfile from "@/actions/addProfile";
 import { ProfileFormSchema, type ProfileFormValues } from "./schema";
 import { useToast } from "@/components/ui/use-toast";
 

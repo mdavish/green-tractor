@@ -1,11 +1,14 @@
-"use server"
+"use server";
 import { prisma } from "@/lib/prisma";
-import { type ProfileFormValues } from "./schema";
+import { type ProfileFormValues } from "../app/dashboard/profile/schema";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; 
+import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
-export default async function updateProfile({name, profile}: ProfileFormValues) {
+export default async function updateProfile({
+  name,
+  profile,
+}: ProfileFormValues) {
   const session = await getServerSession(authOptions);
   if (!session) {
     throw new Error("Not authenticated");
@@ -20,7 +23,7 @@ export default async function updateProfile({name, profile}: ProfileFormValues) 
     data: {
       name,
       profile,
-    }
+    },
   });
   revalidatePath("/profile");
 }
