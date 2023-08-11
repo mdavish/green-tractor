@@ -112,7 +112,7 @@ export function ProfileForm({
               </FormItem>
             )}
           />
-          <div className="flex flex-row gap-x-2">
+          <div className="flex flex-col gap-y-2 md:flex-row md:gap-x-2">
             <FormField
               control={form.control}
               name="address.city"

@@ -10,7 +10,12 @@ export default function Page({
   title?: string;
 }) {
   return (
-    <div className={cn("flex flex-col pt-10 px-10 w-full", className)}>
+    <div
+      className={cn(
+        "flex flex-col pt-6 md:pt-10 px-6 md:px-10 w-full",
+        className
+      )}
+    >
       {title && (
         <h1 className="text-3xl font-medium text-slate-800 mb-8">{title}</h1>
       )}

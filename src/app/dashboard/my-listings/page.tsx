@@ -22,7 +22,7 @@ export default async function aMyListingsPage() {
           return (
             <div
               key={listing.id}
-              className=" border border-slate-300 shadow-sm p-4 rounded-md w-full flex flex-row"
+              className=" border border-slate-300 shadow-sm p-4 rounded-md w-full flex flex-col-reverse md:flex-row"
             >
               <div className="flex flex-col gap-y-2">
                 <Link href={`/dashboard/listings/${listing.id}`}>
@@ -33,7 +33,7 @@ export default async function aMyListingsPage() {
                 <p className="tracking-tight text-sm text-slate-700">
                   {listing.description}
                 </p>
-                <div className="mt-2 flex flex-row text-xs text-slate-500 gap-x-4">
+                <div className="mt-2 flex flex-col gap-y-2 md:flex-row text-xs text-slate-500 gap-x-4">
                   <p>
                     Posted {new Date(listing.listedDate).toLocaleDateString()}
                   </p>
@@ -43,11 +43,13 @@ export default async function aMyListingsPage() {
                   </p>
                 </div>
               </div>
-              <div className="ml-auto mr-4 my-auto">
-                <h2 className="text-3xl font-medium text-center">
+              <div className="md:ml-auto mr-4 my-auto">
+                <h2 className="text-3xl font-medium md:text-center">
                   ${listing.startingPrice}
                 </h2>
-                <p className="mt-2 text-xs text-gray-600">Starting Price</p>
+                <p className="text-white mt-2 text-xs md:text-gray-600">
+                  Starting Price
+                </p>
               </div>
             </div>
           );

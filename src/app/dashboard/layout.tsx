@@ -20,9 +20,9 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className={cn("h-screen w-full flex flex-row")}>
-      <Navigation />
-      {children}
+    <div className={cn("h-screen w-full flex md:flex-row flex-col-reverse")}>
+      <Navigation className="mt-auto" />
+      <div className="w-full h-full overflow-y-auto">{children}</div>
     </div>
   );
 }

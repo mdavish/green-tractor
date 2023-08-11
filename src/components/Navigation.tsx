@@ -9,6 +9,7 @@ interface NavItem {
   name: string;
   href: string;
   icon: React.ReactNode;
+  onMobile?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -16,24 +17,27 @@ const navItems: NavItem[] = [
     name: "Home",
     href: "/dashboard",
     icon: <FaHome />,
+    onMobile: true,
   },
   {
     name: "My Listings",
     href: "/dashboard/my-listings",
     icon: <FaMoneyBillWave />,
+    onMobile: true,
   },
   {
     name: "My Profile",
     href: "/dashboard/profile",
     icon: <FaUserEdit />,
+    onMobile: true,
   },
 ];
 
-export default function Navigation({}: {}) {
+export default function Navigation({ className }: { className?: string }) {
   const pathname = usePathname();
   return (
-    <nav className="w-72 h-full flex flex-col border-r border-slate-100 p-4">
-      <div className="mt-10 flex flex-col gap-y-4">
+    <nav className="md:w-72 h-fit md:h-full md:flex flex-col bg-slate-100 border-t border-slate-200 md:bg-white md:border-r md:border-slate-100 p-4">
+      <div className="md:mt-10 flex flex-row md:flex-col gap-y-4">
         {navItems.map((item) => {
           const active = pathname.endsWith(item.href);
           return (
@@ -45,13 +49,15 @@ export default function Navigation({}: {}) {
               )}
               href={item.href}
             >
-              <div className="my-auto text-lg">{item.icon}</div>
-              <h2>{item.name}</h2>
+              <div className="md:mx-0 w-full md:w-fit my-auto text-lg flex">
+                <span className="mx-auto md:mx-0">{item.icon}</span>
+              </div>
+              <h2 className="hidden md:block">{item.name}</h2>
             </Link>
           );
         })}
       </div>
-      <div className="mt-auto">
+      <div className="hidden md:block mt-auto">
         <UserBadge />
       </div>
     </nav>
