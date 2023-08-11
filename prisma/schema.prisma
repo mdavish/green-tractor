@@ -46,6 +46,16 @@ model User {
   accounts      Account[]
   sessions      Session[]
   Listing       Listing[]
+  // Address fields are optional because Prisma creates the user
+  // before the address can be populated. We may consider separating into
+  // a separate table in the future.
+  addressLine1  String?
+  addressLine2  String?
+  region        String?
+  city          String?
+  postalCode    String?
+  latitude      Float?
+  longitude     Float?
 }
 
 model VerificationToken {

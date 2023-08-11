@@ -24,7 +24,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type ListingData, ListingSchema } from "./schema";
+import { type ListingData, ListingSchema } from "../../../../schemas/Listing";
 
 export default function NewListingPage() {
   const form = useForm<ListingData>({

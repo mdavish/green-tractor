@@ -1,8 +1,5 @@
 "use server";
-import {
-  ListingData,
-  ListingSchema,
-} from "@/app/dashboard/listings/new/schema";
+import { ListingData, ListingSchema } from "@/schemas/Listing";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
