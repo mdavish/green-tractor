@@ -36,7 +36,7 @@ const navItems: NavItem[] = [
 export default function Navigation({ className }: { className?: string }) {
   const pathname = usePathname();
   return (
-    <nav className="md:w-72 h-fit md:h-full md:flex flex-col bg-slate-100 border-t border-slate-200 md:bg-white md:border-r md:border-slate-100 p-4">
+    <nav className="md:w-72 h-fit md:h-full md:flex flex-col bg-slate-100 border-t border-slate-200 md:bg-white md:border-r md:border-slate-100 p-2 md:p-4">
       <div className="md:mt-10 flex flex-row md:flex-col gap-y-4">
         {navItems.map((item) => {
           const active = pathname.endsWith(item.href);
