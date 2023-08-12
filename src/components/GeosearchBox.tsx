@@ -162,7 +162,7 @@ export default function GeosearchBox({
         onKeyDown={handleKeyDown}
       ></Input>
       {results && showResults && results.suggestions.length > 0 && (
-        <div className="mt-1 absolute top-[100%] w-full bg-white border border-gray-200 rounded-md overflow-hidden flex flex-col gap-y-2 text-sm">
+        <div className="mt-1 absolute z-30 top-[100%] w-full bg-white border border-gray-200 rounded-md overflow-hidden flex flex-col gap-y-2 text-sm">
           <div className="text-xs ml-2 mt-2 uppercase text-gray-600">
             Suggestions
           </div>
@@ -175,12 +175,12 @@ export default function GeosearchBox({
                   isSelected && "bg-gray-100"
                 )}
                 key={suggestion.mapbox_id}
-                onClick={() => {
+                onMouseDown={() => {
                   setSelectedIndex(index);
                   handleSelection();
                 }}
               >
-                <div>{suggestion.full_address}</div>
+                {suggestion.full_address}
               </button>
             );
           })}

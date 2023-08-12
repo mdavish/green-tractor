@@ -98,7 +98,7 @@ export default function Navigation({ className }: { className?: string }) {
       <nav className="md:w-72 h-fit md:h-full md:flex flex-col bg-slate-100 border-t border-slate-200 md:bg-white md:border-r md:border-slate-100 p-2 md:p-4">
         <Button
           onClick={() => setOpen(true)}
-          className="flex flex-row group text-slate-500 hover:text-slate-700 transition-all ease-in-out duration-300 shadow-sm hover:shadow-md"
+          className="hidden md:flex flex-row group text-slate-500 hover:text-slate-700 transition-all ease-in-out duration-300 shadow-sm hover:shadow-md"
           variant={"outline"}
         >
           <div className="mr-auto">Search...</div>{" "}
