@@ -99,7 +99,8 @@ export default function GeosearchBox({
     }
 
     if (e.key === "Enter") {
-      handleFocus();
+      e.preventDefault();
+      handleSelection();
     }
   };
 
@@ -109,17 +110,22 @@ export default function GeosearchBox({
   // We blur the input
   // We change the input value to the selected result
   // We call the onSelect callback with the selected result
-  async function handleSelection() {
+  async function handleSelection(index?: number) {
     if (!results) {
       throw new Error("You are attempting to select a result with no results.");
     }
-    if (selectedIndex === undefined) {
+
+    // If no index is provided, use the selected index
+    // (We allow you to provide an index in the case of a click event)
+    const indexToSelect = index === undefined ? selectedIndex : index;
+
+    if (indexToSelect === undefined) {
       throw new Error(
         "You are attempting to select a result with no selected index."
       );
     }
 
-    const selectedSuggestion = results.suggestions[selectedIndex];
+    const selectedSuggestion = results.suggestions[indexToSelect];
 
     // The UI updates immediately
     setInputValue(selectedSuggestion.full_address);
@@ -177,7 +183,7 @@ export default function GeosearchBox({
                 key={suggestion.mapbox_id}
                 onMouseDown={() => {
                   setSelectedIndex(index);
-                  handleSelection();
+                  handleSelection(index);
                 }}
               >
                 {suggestion.full_address}

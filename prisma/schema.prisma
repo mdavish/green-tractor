@@ -37,25 +37,27 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  profile       String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  Listing       Listing[]
+  id                String    @id @default(cuid())
+  stripeAccountId   String?
+  stripeAccountLink String?
+  name              String?
+  profile           String?
+  email             String?   @unique
+  emailVerified     DateTime?
+  image             String?
+  accounts          Account[]
+  sessions          Session[]
+  Listing           Listing[]
   // Address fields are optional because Prisma creates the user
   // before the address can be populated. We may consider separating into
   // a separate table in the future.
-  addressLine1  String?
-  addressLine2  String?
-  region        String?
-  city          String?
-  postalCode    String?
-  latitude      Float?
-  longitude     Float?
+  addressLine1      String?
+  addressLine2      String?
+  region            String?
+  city              String?
+  postalCode        String?
+  latitude          Float?
+  longitude         Float?
 }
 
 model VerificationToken {
