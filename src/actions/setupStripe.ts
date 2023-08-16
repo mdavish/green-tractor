@@ -1,3 +1,4 @@
+"use server";
 import stripe from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
@@ -51,7 +52,7 @@ export default async function setupStripe() {
     type: "account_onboarding",
     // TODO: Confirm this is the correct URL for reauth
     refresh_url: `${process.env.NEXTAUTH_URL}/reauth`,
-    return_url: `${process.env.NEXTAUTH_URL}/dashboard`,
+    return_url: `${process.env.NEXTAUTH_URL}/dashboard/profile`,
   });
 
   console.log(`Created account link for ${currentUser.email}`);

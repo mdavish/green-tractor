@@ -1,26 +1,27 @@
 import { ProfileForm } from "./ProfileForm";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import Page from "@/components/Page";
 import { StateSchema, type State } from "@/schemas/State";
 import SectionHeader from "@/components/SectionHeader";
-import EmptyState from "@/components/EmptyState";
-import { FaBusinessTime } from "react-icons/fa";
+import StripeEmptyState from "@/components/StripeEmptyState";
+import { getCurrentUser } from "@/lib/auth";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { FaCheckCircle } from "react-icons/fa";
+import stripeClient from "@/lib/stripe";
 
 export default async function ProfilePage() {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    throw new Error("Not authenticated");
-  }
-  const user = await prisma.user.findUnique({
-    where: {
-      email: session.user?.email!,
-    },
-  });
+  const user = await getCurrentUser();
 
   if (!user) {
     throw new Error("User not found");
+  }
+
+  // TODO: Show this in the UI.
+  let payoutsEnabled = false;
+  if (user.stripeAccountId) {
+    const accountDetails = await stripeClient.accounts.retrieve(
+      user.stripeAccountId
+    );
+    payoutsEnabled = accountDetails.payouts_enabled;
   }
 
   let region: State | undefined;
@@ -28,8 +29,6 @@ export default async function ProfilePage() {
   if (parsedState.success) {
     region = parsedState.data;
   }
-
-  const handleStripeSetup = async () => {};
 
   return (
     <Page title="My Profile">
@@ -58,12 +57,20 @@ export default async function ProfilePage() {
           header="Business Information"
           subheader="Settings for managing payments to your business."
         />
-        <EmptyState
-          title="Set up your Business Account"
-          subtitle="In order to receive payments from Green Tractor, you need to set up your business account."
-          buttonText="Set Up Now"
-          Icon={FaBusinessTime}
-        />
+        {/* TODO: Handle the case where Stripe account exists but payouts not enabled. */}
+        {payoutsEnabled ? (
+          // TODO: Add additional information/details.
+          <Alert>
+            <FaCheckCircle className="text-primary mr-2 h-4 w-4" />
+            <AlertTitle>You&lsquo;re all set.</AlertTitle>
+            <AlertDescription>
+              Your business information has been verified and you can now accept
+              payments.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <StripeEmptyState />
+        )}
       </div>
     </Page>
   );
