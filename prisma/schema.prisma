@@ -58,6 +58,7 @@ model User {
   postalCode        String?
   latitude          Float?
   longitude         Float?
+  Offer             Offer[]
 }
 
 model VerificationToken {
@@ -74,9 +75,31 @@ model Listing {
   listedDate            DateTime
   expirationDate        DateTime
   startingPrice         Float
-  startingPriceCurrency String
+  startingPriceCurrency String?  @default("USD")
   description           String
   imageUrl              String?
   listingUserId         String
   listingUser           User     @relation(fields: [listingUserId], references: [id], onDelete: Cascade)
+  Offer                 Offer[]
+}
+
+enum OfferStatus {
+  OPEN // The offer has been submitted, but the seller has not yet responded
+  REJECTED // The seller has rejected the offer
+  ACCEPTED // The offer has been accepted, but payment has not yet been received
+  PAID // The offer has been accepted and payment has been received
+  CANCELLED // The offer was accepted, but the buyer cancelled the offer
+}
+
+model Offer {
+  id                 String      @id @default(cuid())
+  offerDate          DateTime
+  offerMessage       String
+  offerPrice         Float
+  offerPriceCurrency String?     @default("USD")
+  offerUserId        String
+  offerUser          User        @relation(fields: [offerUserId], references: [id], onDelete: Cascade)
+  listingId          String
+  listing            Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  status             OfferStatus @default(OPEN)
 }

@@ -18,7 +18,7 @@ import { ProfileSchema, type Profile } from "../../../schemas/Profile";
 import { useToast } from "@/components/ui/use-toast";
 import GeosearchBox from "@/components/GeosearchBox";
 import { Dropdown } from "@/components/Dropdown";
-import { states, StateSchema, convertDisplayToValue } from "@/schemas/State";
+import { states } from "@/schemas/State";
 
 export function ProfileForm({
   name,
