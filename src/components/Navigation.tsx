@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import UserBadge from "@/components/UserBadge";
 import Link from "next/link";
-import { FaHome, FaUserEdit, FaMoneyBillWave } from "react-icons/fa";
+import { FaHome, FaUserEdit, FaMoneyBillWave, FaInbox } from "react-icons/fa";
 import { GiFarmer } from "react-icons/gi";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -33,6 +33,12 @@ const navItems: NavItem[] = [
     onMobile: true,
   },
   {
+    name: "Inbox",
+    href: "/dashboard/inbox",
+    icon: <FaInbox />,
+    onMobile: true,
+  },
+  {
     name: "My Listings",
     href: "/dashboard/my-listings",
     icon: <FaMoneyBillWave />,
@@ -42,7 +48,7 @@ const navItems: NavItem[] = [
     name: "Farmers",
     href: "/dashboard/farmers",
     icon: <GiFarmer />,
-    onMobile: true,
+    onMobile: false,
   },
   {
     name: "My Profile",

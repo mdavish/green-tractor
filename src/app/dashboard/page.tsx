@@ -7,6 +7,7 @@ export default async function DashboardHomePage() {
   const allListings = await prisma.listing.findMany({
     include: {
       listingUser: true,
+      Offer: true,
     },
   });
   const currentUser = await getCurrentUser();
@@ -20,6 +21,7 @@ export default async function DashboardHomePage() {
               key={listing.id}
               listing={listing}
               currentUser={currentUser!}
+              offers={listing.Offer}
             />
           );
         })}

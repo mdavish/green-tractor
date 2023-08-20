@@ -59,6 +59,8 @@ model User {
   latitude          Float?
   longitude         Float?
   Offer             Offer[]
+  messagesTo        Message[] @relation("MessageToUser")
+  messagesFrom      Message[] @relation("MessageFromUser")
 }
 
 model VerificationToken {
@@ -102,4 +104,14 @@ model Offer {
   listingId          String
   listing            Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
   status             OfferStatus @default(OPEN)
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  toUserId   String
+  fromUserId String
+  message    String
+  sentAt     DateTime
+  toUser     User     @relation("MessageToUser", fields: [toUserId], references: [id], onDelete: Cascade)
+  fromUser   User     @relation("MessageFromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
 }

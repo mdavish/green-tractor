@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Listing, User } from "@prisma/client";
+import { Listing, User, Offer } from "@prisma/client";
 import { haversineDistance } from "@/lib/utils";
 import { FaExclamationCircle } from "react-icons/fa";
 import { Button } from "./ui/button";
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { OfferSchema, type Offer } from "@/schemas/Offer";
+import { OfferFormSchema, type OfferFormData } from "@/schemas/Offer";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
 import { useTransition, useState } from "react";
@@ -34,11 +34,13 @@ interface ListingPreviewProps {
     listingUser: User;
   };
   currentUser: User;
+  offers: Offer[];
 }
 
 export default function ListingPreview({
   listing,
   currentUser,
+  offers,
 }: ListingPreviewProps) {
   const shouldDisplayDistance =
     listing.listingUser.latitude &&
@@ -59,9 +61,9 @@ export default function ListingPreview({
   const formattedDistance = distance?.toFixed(2);
 
   const form = useForm<Offer>({
-    resolver: zodResolver(OfferSchema),
+    resolver: zodResolver(OfferFormSchema),
     defaultValues: {
-      price: listing.startingPrice,
+      offerPrice: listing.startingPrice,
     },
   });
 
@@ -92,6 +94,11 @@ export default function ListingPreview({
       }
     });
   };
+
+  const totalOffers = offers.length;
+  const currentUserHasOffered = offers.some(
+    (offer) => offer.offerUserId === currentUser.id
+  );
 
   return (
     <div
@@ -126,6 +133,11 @@ export default function ListingPreview({
               Expires {new Date(listing.expirationDate).toLocaleDateString()}
             </p>
           </div>
+          {totalOffers > 0 && (
+            <p className="text-xs text-slate-500">
+              {totalOffers} offer{totalOffers > 1 ? "s" : ""} submitted
+            </p>
+          )}
         </div>
       </div>
       <div className="md:ml-auto mr-4 my-auto flex flex-col">
@@ -135,73 +147,82 @@ export default function ListingPreview({
         <p className="text-white mt-2 text-xs md:text-gray-600 ml-auto flex flex-row mb-4">
           Starting Price
         </p>
-        <Dialog
-          open={showDialog}
-          defaultOpen={false}
-          onOpenChange={setShowDialog}
-        >
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                if (listingIsTheirs) return;
-                setShowDialog(true);
-              }}
-              disabled={listingIsTheirs}
-              className="ml-auto w-fit"
-            >
-              Submit Offer
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Bid on {listing.title}</DialogTitle>
-              <DialogDescription>
-                Submit an offer for {listing.title} below. This will send a
-                message to the seller with your bid amount and contact
-                information.
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-              <form
-                className="flex flex-col gap-y-2 my-2"
-                onSubmit={form.handleSubmit(onSubmit)}
+        {/* If the current user has already offered, just take them to their current offer */}
+        {/* TODO: Deep link directly to specific conversation */}
+        {currentUserHasOffered && (
+          <Link href={`/dashboard/inbox/`}>
+            <Button className="ml-auto w-fit">View My Offer</Button>
+          </Link>
+        )}
+        {!currentUserHasOffered && (
+          <Dialog
+            open={showDialog}
+            defaultOpen={false}
+            onOpenChange={setShowDialog}
+          >
+            <DialogTrigger asChild>
+              <Button
+                onClick={() => {
+                  if (listingIsTheirs) return;
+                  setShowDialog(true);
+                }}
+                disabled={listingIsTheirs}
+                className="ml-auto w-fit"
               >
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Message</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder={`Enter a message for ${listing.listingUser.name}...`}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Price</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="number" />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <DialogFooter>
-                  <Button type="submit">
-                    {isPending ? "Submitting..." : "Submit"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+                Submit Offer
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Bid on {listing.title}</DialogTitle>
+                <DialogDescription>
+                  Submit an offer for {listing.title} below. This will send a
+                  message to the seller with your bid amount and contact
+                  information.
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...form}>
+                <form
+                  className="flex flex-col gap-y-2 my-2"
+                  onSubmit={form.handleSubmit(onSubmit)}
+                >
+                  <FormField
+                    control={form.control}
+                    name="offerMessage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Message</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            placeholder={`Enter a message for ${listing.listingUser.name}...`}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="offerPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Price</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="number" />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <DialogFooter>
+                    <Button type="submit">
+                      {isPending ? "Submitting..." : "Submit"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );

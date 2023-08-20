@@ -2,10 +2,10 @@
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import type { Listing, User } from "@prisma/client";
-import type { Offer } from "@/schemas/Offer";
+import type { OfferFormData, OfferFormSchema } from "@/schemas/Offer";
 
 export default async function createOffer(
-  offer: Offer,
+  offer: OfferFormData,
   listing: Listing,
   listingUser: User
 ) {
@@ -15,9 +15,9 @@ export default async function createOffer(
   }
   return await prisma.offer.create({
     data: {
+      offerMessage: offer.offerMessage,
+      offerPrice: offer.offerPrice,
       offerDate: new Date(),
-      offerMessage: offer.message,
-      offerPrice: offer.price,
       listingId: listing.id,
       offerUserId: currentUser.id,
     },
