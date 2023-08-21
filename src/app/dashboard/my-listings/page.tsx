@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import ListingPreview from "@/components/ListingPreview";
 
 export default async function aMyListingsPage() {
   const currentUser = await getCurrentUser();
@@ -10,6 +11,10 @@ export default async function aMyListingsPage() {
   const listings = await prisma.listing.findMany({
     where: {
       listingUserId: currentUser.id,
+    },
+    include: {
+      listingUser: true,
+      Offer: true,
     },
   });
   return (
@@ -20,38 +25,12 @@ export default async function aMyListingsPage() {
       <div className="flex flex-col my-4 gap-y-4 max-w-3xl">
         {listings.map((listing, index) => {
           return (
-            <div
-              key={listing.id}
-              className=" border border-slate-300 shadow-sm p-4 rounded-md w-full flex flex-col-reverse md:flex-row"
-            >
-              <div className="flex flex-col gap-y-2">
-                <Link href={`/dashboard/listings/${listing.id}`}>
-                  <h1 className="hover:underline font-medium">
-                    {listing.title}
-                  </h1>
-                </Link>
-                <p className="tracking-tight text-sm text-slate-700">
-                  {listing.description}
-                </p>
-                <div className="mt-2 flex flex-col gap-y-2 md:flex-row text-xs text-slate-500 gap-x-4">
-                  <p>
-                    Posted {new Date(listing.listedDate).toLocaleDateString()}
-                  </p>
-                  <p>
-                    Expires{" "}
-                    {new Date(listing.expirationDate).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-              <div className="md:ml-auto mr-4 my-auto">
-                <h2 className="text-3xl font-medium md:text-center">
-                  ${listing.startingPrice}
-                </h2>
-                <p className="text-white mt-2 text-xs md:text-gray-600">
-                  Starting Price
-                </p>
-              </div>
-            </div>
+            <ListingPreview
+              listing={listing}
+              key={index}
+              currentUser={currentUser}
+              offers={listing.Offer}
+            />
           );
         })}
       </div>

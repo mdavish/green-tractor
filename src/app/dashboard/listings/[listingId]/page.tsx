@@ -1,7 +1,6 @@
 import Page from "@/components/Page";
 import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
-import Link from "next/link";
 interface Params {
   params: {
     listingId: string;

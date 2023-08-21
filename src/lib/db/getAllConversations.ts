@@ -5,7 +5,21 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
-export default async function getAllConversations() {
+interface Conversation {
+  otherUserId: string;
+  otherUser: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
+  latestOffer: {
+    offerId: string;
+    offerMessage: string;
+    offerDate: Date;
+  };
+}
+
+export default async function getAllConversations(): Promise<Conversation[]> {
   const currentUser = await getCurrentUser();
   if (!currentUser) {
     throw new Error("Not authenticated");
@@ -44,30 +58,55 @@ export default async function getAllConversations() {
       ],
     },
     include: {
-      listing: true,
+      listing: {
+        include: {
+          listingUser: true,
+        },
+      },
+      offerUser: true,
     },
   });
 
   // Find the latest message for each other user
-  const conversations = offersToOrFrom.map((offer) => {
+  const conversations: Conversation[] = [];
+  offersToOrFrom.forEach((offer) => {
     const otherUserId =
       offer.offerUserId === currentUser.id
         ? offer.listing.listingUserId
         : offer.offerUserId;
-
-    return {
-      offerId: offer.id,
-      offerDate: offer.offerDate,
-      offerUserId: offer.offerUserId,
-      offerListingId: offer.listingId,
-      offerPrice: offer.offerPrice,
-      offerMessage: offer.offerMessage,
-      listingId: offer.listing.id,
-      title: offer.listing.title,
-      description: offer.listing.description,
-      listingUserId: offer.listing.listingUserId,
-      otherUserId,
-    };
+    const conversation = conversations.find(
+      (c) => c.otherUserId === otherUserId
+    );
+    if (!conversation) {
+      conversations.push({
+        otherUserId,
+        otherUser: {
+          id:
+            offer.offerUserId === currentUser.id
+              ? offer.listing.listingUserId
+              : offer.offerUserId,
+          name:
+            offer.offerUserId === currentUser.id
+              ? offer.listing.listingUser.name
+              : offer.offerUser.name,
+          image:
+            offer.offerUserId === currentUser.id
+              ? offer.listing.listingUser.image
+              : offer.offerUser.image,
+        },
+        latestOffer: {
+          offerId: offer.id,
+          offerMessage: offer.offerMessage,
+          offerDate: offer.offerDate,
+        },
+      });
+    } else if (conversation.latestOffer.offerDate < offer.offerDate) {
+      conversation.latestOffer = {
+        offerId: offer.id,
+        offerMessage: offer.offerMessage,
+        offerDate: offer.offerDate,
+      };
+    }
   });
   return conversations;
 }

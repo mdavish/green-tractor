@@ -1,15 +1,23 @@
 import getAllConversations from "@/lib/db/getAllConversations";
-import Link from "next/link";
+import { ConversationsSideBar } from "./ConversationsSideBar";
+import { redirect } from "next/navigation";
 
 export default async function InboxPage({
+  params,
   children,
 }: {
   children: React.ReactNode;
+  params: { [key: string]: string };
 }) {
   const allConversations = await getAllConversations();
+  // TODO:
+  // If there are some conversations, redirect to the first one
+  // if (allConversations.length > 0 && !params.userId) {
+  //   redirect(`/dashboard/inbox/${allConversations[0].offerUserId}`);
+  // }
   return (
     <div className="w-full h-full flex flex-row">
-      <div className="w-1/4 h-full border-r border-slate-200 flex flex-col divide-y divide-slate-200">
+      <div className="w-1/3 max-w-lg shrink-0 h-full border-r border-slate-100 flex flex-col divide-y divide-slate-200">
         <div className="p-4">
           <h2 className="font-normal text-xl text-slate-900">Conversations</h2>
         </div>
@@ -18,19 +26,7 @@ export default async function InboxPage({
             <p className="p-4 text-slate-500">No conversations yet</p>
           </div>
         )}
-        <div className="flex flex-col divide-y">
-          {allConversations.map((conv) => {
-            return (
-              <Link
-                href={`/dashboard/inbox/${conv.offerUserId}`}
-                className="p-4 hover:bg-slate-100 cursor-pointer overflow-hidden text-sm overflow-ellipsis whitespace-nowrap"
-                key={conv.offerUserId}
-              >
-                {`Other User:${conv.otherUserId}`}
-              </Link>
-            );
-          })}
-        </div>
+        <ConversationsSideBar allConversations={allConversations} />
       </div>
       {children}
     </div>

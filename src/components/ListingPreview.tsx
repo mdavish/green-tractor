@@ -83,6 +83,7 @@ export default function ListingPreview({
           description:
             "Your offer has been submitted. The seller will be in touch with you shortly.",
         });
+        setShowDialog(false);
       } catch (error) {
         console.error(error);
         toast({
@@ -91,6 +92,7 @@ export default function ListingPreview({
           description:
             "There was an error submitting your offer. Please try again later.",
         });
+        setShowDialog(false);
       }
     });
   };

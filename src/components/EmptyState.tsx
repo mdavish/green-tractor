@@ -1,4 +1,5 @@
 import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
 
 export default function EmptyState({
   title,
@@ -7,16 +8,18 @@ export default function EmptyState({
   Icon,
   onClick,
   buttonLoading,
+  className,
 }: {
   title: string;
   subtitle: string;
-  buttonText: string;
+  buttonText?: string;
   Icon: React.FC<{ className: string }>;
   onClick?: () => void;
   buttonLoading?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="text-center">
+    <div className={cn("text-center", className)}>
       <svg
         className="mx-auto h-12 w-12 text-slate-400"
         fill="none"
@@ -35,16 +38,18 @@ export default function EmptyState({
       <h3 className="mt-2 text-sm font-semibold text-slate-900">{title}</h3>
       <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
       <div className="mt-6">
-        <Button
-          onClick={onClick}
-          // TODO: Implement loading
-          type="button"
-          variant={"default"}
-          // className="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
-          <Icon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-          {buttonText}
-        </Button>
+        {buttonText && (
+          <Button
+            onClick={onClick}
+            // TODO: Implement loading
+            type="button"
+            variant={"default"}
+            // className="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <Icon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+            {buttonText}
+          </Button>
+        )}
       </div>
     </div>
   );

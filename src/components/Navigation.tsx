@@ -7,10 +7,8 @@ import { GiFarmer } from "react-icons/gi";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import {
   CommandDialog,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -114,7 +112,11 @@ export default function Navigation({ className }: { className?: string }) {
         </Button>
         <div className="md:mt-10 flex flex-row md:flex-col gap-y-4">
           {navItems.map((item) => {
-            const active = pathname.endsWith(item.href);
+            // A path name is active if contains the href
+            // Except for the home page, which is active if the path name is exactly the href
+            const active =
+              pathname === item.href ||
+              (item.href !== "/dashboard" && pathname.includes(item.href));
             return (
               <Link
                 key={item.name}
