@@ -5,11 +5,13 @@ const SectionHeader = ({
   subheader,
   size = "sm",
   className,
+  showBorder = true,
 }: {
   header: string;
   subheader: string;
   size?: "sm" | "lg";
   className?: string;
+  showBorder?: boolean;
 }) => {
   return (
     <div className={cn("flex flex-col gap-y-1 my-2 max-w-3xl", className)}>
@@ -22,7 +24,7 @@ const SectionHeader = ({
         >
           {header}
         </h3>
-        {size === "sm" && (
+        {size === "sm" && showBorder && (
           <div className="ml-2 flex-grow border-t border-slate-200 my-auto" />
         )}
       </div>
