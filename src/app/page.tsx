@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Patua_One } from "next/font/google";
 import { FaArrowRight } from "react-icons/fa";
 import tractorDominant from "../../public/tractor_dominant.jpg";
+import logoGreen from "../../public/logoGreen.png";
 
 const patuaOne = Patua_One({
   weight: "400",
@@ -17,15 +18,23 @@ const patuaOne = Patua_One({
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center gap-y-6">
-      <nav className="bg-primary border-b border-primary/70 w-full flex items-center justify-between py-3 px-4">
-        <h1 className={cn("text-white text-xl font-bold", patuaOne.className)}>
+      <nav className="bg-white border-b border-slate-200 w-full flex items-center justify-between py-3 px-4">
+        <Image
+          className="my-auto mr-4"
+          src={logoGreen}
+          alt="Green Tractor Logo"
+          width={40}
+          height={40}
+        />
+        <h1
+          className={cn(
+            "text-primary text-xl font-bold select-none",
+            patuaOne.className
+          )}
+        >
           Green Tractor
         </h1>
-        <Button
-          variant={"secondary"}
-          className="w-fit ml-auto"
-          onClick={() => signIn()}
-        >
+        <Button className="w-fit ml-auto" onClick={() => signIn()}>
           Sign In
         </Button>
       </nav>
@@ -39,15 +48,22 @@ export default function Home() {
                 y: 0,
                 transition: { duration: 0.5 },
               }}
-              className="w-fit md:w-full flex flex-col gap-y-4 border p-4 rounded-xl shadow-lg border-primary bg-white text-center my-auto"
+              className="w-fit md:w-full flex flex-col gap-y-4 border p-4 rounded-xl shadow-lg border-slate-300 bg-white text-center my-auto"
             >
+              <Image
+                className="mx-auto"
+                src={logoGreen}
+                alt="Green Tractor Logo"
+                width={175}
+                height={175}
+              />
               <h1
                 className={cn(
-                  "text-primary text-4xl md:text-7xl font-bold",
+                  "text-primary text-4xl md:text-5xl font-bold",
                   patuaOne.className
                 )}
               >
-                Green <br /> Tractor
+                Green Tractor
               </h1>
               <p className="text-sm md:text-base w-3/4 mx-auto text-slate-900">
                 Green Tractor makes it easy to buy and sell farm equipment,

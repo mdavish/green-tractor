@@ -15,7 +15,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Button } from "./ui/button";
-
+import Logo from "./Logo";
 interface NavItem {
   name: string;
   href: string;
@@ -100,6 +100,7 @@ export default function Navigation({ className }: { className?: string }) {
         </CommandList>
       </CommandDialog>
       <nav className="md:w-72 h-fit md:h-full md:flex flex-col bg-slate-100 border-t border-slate-200 md:bg-white md:border-r md:border-slate-100 p-2 md:p-4">
+        <Logo className="mb-4 mt-2" />
         <Button
           onClick={() => setOpen(true)}
           className="hidden md:flex flex-row group text-slate-500 hover:text-slate-700 transition-all ease-in-out duration-300 shadow-sm hover:shadow-md"
