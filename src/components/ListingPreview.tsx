@@ -4,30 +4,7 @@ import { Listing, User, Offer } from "@prisma/client";
 import { haversineDistance } from "@/lib/utils";
 import { FaExclamationCircle } from "react-icons/fa";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { OfferFormSchema, type OfferFormData } from "@/schemas/Offer";
-import { Textarea } from "./ui/textarea";
-import { Input } from "./ui/input";
-import { useTransition, useState } from "react";
-import createOffer from "@/actions/createOffer";
-import { useToast } from "./ui/use-toast";
+import OfferButton from "./OfferButton";
 
 interface ListingPreviewProps {
   listing: Listing & {
@@ -59,43 +36,7 @@ export default function ListingPreview({
     : null;
 
   const formattedDistance = distance?.toFixed(2);
-
-  const form = useForm<Offer>({
-    resolver: zodResolver(OfferFormSchema),
-    defaultValues: {
-      offerPrice: listing.startingPrice,
-    },
-  });
-
   const listingIsTheirs = listing.listingUser.id === currentUser.id;
-
-  const [showDialog, setShowDialog] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
-
-  // TODO: Add logic with server actions
-  const onSubmit = async (offer: Offer) => {
-    startTransition(async () => {
-      try {
-        await createOffer(offer, listing, listing.listingUser);
-        toast({
-          title: "Offer Submitted",
-          description:
-            "Your offer has been submitted. The seller will be in touch with you shortly.",
-        });
-        setShowDialog(false);
-      } catch (error) {
-        console.error(error);
-        toast({
-          variant: "destructive",
-          title: "Error Submitting Offer",
-          description:
-            "There was an error submitting your offer. Please try again later.",
-        });
-        setShowDialog(false);
-      }
-    });
-  };
 
   const totalOffers = offers.length;
   const currentUserHasOffered = offers.some(
@@ -157,73 +98,12 @@ export default function ListingPreview({
           </Link>
         )}
         {!currentUserHasOffered && (
-          <Dialog
-            open={showDialog}
-            defaultOpen={false}
-            onOpenChange={setShowDialog}
-          >
-            <DialogTrigger asChild>
-              <Button
-                onClick={() => {
-                  if (listingIsTheirs) return;
-                  setShowDialog(true);
-                }}
-                disabled={listingIsTheirs}
-                className="ml-auto w-fit"
-              >
-                Submit Offer
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Bid on {listing.title}</DialogTitle>
-                <DialogDescription>
-                  Submit an offer for {listing.title} below. This will send a
-                  message to the seller with your bid amount and contact
-                  information.
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...form}>
-                <form
-                  className="flex flex-col gap-y-2 my-2"
-                  onSubmit={form.handleSubmit(onSubmit)}
-                >
-                  <FormField
-                    control={form.control}
-                    name="offerMessage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Message</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            placeholder={`Enter a message for ${listing.listingUser.name}...`}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="offerPrice"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Price</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="number" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <DialogFooter>
-                    <Button type="submit">
-                      {isPending ? "Submitting..." : "Submit"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+          <OfferButton
+            listing={listing}
+            currentUser={currentUser}
+            buttonText="Make an Offer"
+            buttonClassName="ml-auto w-fit"
+          />
         )}
       </div>
     </div>

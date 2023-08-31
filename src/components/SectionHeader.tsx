@@ -14,7 +14,7 @@ const SectionHeader = ({
   showBorder?: boolean;
 }) => {
   return (
-    <div className={cn("flex flex-col gap-y-1 my-2 max-w-3xl", className)}>
+    <div className={cn("flex flex-col gap-y-1 my-2 max-w-4xl", className)}>
       <div className="flex flex-row">
         <h3
           className={cn(

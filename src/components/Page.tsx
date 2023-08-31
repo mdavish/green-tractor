@@ -7,6 +7,7 @@ export default function Page({
   className,
   title,
   buttons,
+  maxWidth = true,
 }: {
   children: React.ReactNode;
   className?: string;
@@ -16,9 +17,16 @@ export default function Page({
     onClick: () => void;
     variant: ButtonProps["variant"];
   }[];
+  maxWidth?: boolean;
 }) {
   return (
-    <div className={cn("flex flex-col p-6 md:p-10 w-full", className)}>
+    <div
+      className={cn(
+        "flex flex-col p-6 md:p-10 w-full",
+        maxWidth && "max-w-4xl",
+        className
+      )}
+    >
       {title && (
         <div className="w-full flex flex-row">
           <h1 className="text-3xl font-medium text-slate-800 mb-8">{title}</h1>

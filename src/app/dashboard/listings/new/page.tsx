@@ -28,8 +28,6 @@ import { type ListingData, ListingSchema } from "../../../../schemas/Listing";
 
 export default function NewListingPage() {
   const form = useForm<ListingData>({
-    // TODO: Get this working
-    // For some reason, zodResolver prevents the form from submitting
     resolver: zodResolver(ListingSchema),
     defaultValues: {
       title: "",
@@ -41,7 +39,6 @@ export default function NewListingPage() {
   const [isPending, startTransition] = useTransition();
 
   function onSubmit(data: ListingData) {
-    console.log("Submitting the data");
     startTransition(async () => {
       await addListing(data);
     });

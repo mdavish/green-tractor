@@ -10,12 +10,16 @@ export async function addListing({
   listedDate,
   startingPrice,
   expirationDate,
+  imageUrl,
 }: ListingData) {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
     throw new Error("No current user");
   }
+
+  // What will this return?
+  console.log({ imageUrl });
 
   const newListing = await prisma.listing.create({
     include: {

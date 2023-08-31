@@ -22,7 +22,7 @@ export default function FarmerPreview({
         <AvatarImage src={image!} />
         <AvatarFallback>{name?.slice(0, 1)}</AvatarFallback>
       </Avatar>
-      <div className="flex flex-col gap-y-1 my-auto">
+      <div className="flex flex-col gap-y-0.5 my-auto">
         <Link className="hover:underline" href={`/farmers/${id}`}>
           <h1 className="font-medium text-slate-900">{name}</h1>
         </Link>

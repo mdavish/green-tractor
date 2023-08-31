@@ -6,6 +6,9 @@ import SectionHeader from "@/components/SectionHeader";
 import FarmerPreview from "@/components/FarmerPreview";
 import Pill from "@/components/Pill";
 import StaticMap from "@/components/StaticMap";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import OfferButton from "@/components/OfferButton";
 interface Params {
   params: {
     listingId: string;
@@ -46,6 +49,9 @@ export default async function ListingDetail({ params: { listingId } }: Params) {
 
   const currentUser = await getCurrentUser();
   const isOwner = listing?.listingUserId === currentUser?.id;
+  const currentUserHasOffered = listing?.Offer.some(
+    (offer) => offer.offerUserId === currentUser?.id
+  );
 
   const totalOffers = listing?.Offer.length ?? 0;
 
@@ -55,18 +61,27 @@ export default async function ListingDetail({ params: { listingId } }: Params) {
   return (
     <Page title={listing.title}>
       <div className="flex flex-col md:flex-row md:gap-x-10 max-w-3xl">
+        <div className="h-[50vh] w-full bg-slate-200 rounded-lg shadow-sm flex">
+          <h1 className="mx-auto my-auto text-slate-900 text-2xl">
+            Image Placeholder
+          </h1>
+        </div>
         <div className="flex flex-col gap-y-2">
           <h2 className="text-3xl font-medium">${listing.startingPrice}</h2>
-          <p className="text-slate-700 tracking-tight">{listing.description}</p>
+          <p className="text-slate-700">{listing.description}</p>
           <div className="mt-2 flex flex-row text-xs text-slate-500 gap-x-4">
             <p>Posted {new Date(listing.listedDate).toLocaleDateString()}</p>
             <p>
               Expires {new Date(listing.expirationDate).toLocaleDateString()}
             </p>
           </div>
-          <div className="mt-4 flex flex-col gap-y-2">
-            <h3 className="text-base font-medium">Seller Details</h3>
-            {isOwner && <Pill text="My Listing" />}
+          <div className="mt-4 flex flex-col gap-y-4">
+            <div className="flex flex-row w-full">
+              <h3 className="my-auto text-base font-medium">Seller Details</h3>
+              {isOwner && (
+                <Pill className="my-auto ml-auto" text="My Listing" />
+              )}
+            </div>
             <FarmerPreview {...listing.listingUser} />
             {latitude && longitude && (
               <StaticMap
@@ -76,12 +91,19 @@ export default async function ListingDetail({ params: { listingId } }: Params) {
                 height={200}
               />
             )}
+            {isOwner && <Button variant="destructive">Delete Listing</Button>}
+            {!isOwner && !currentUserHasOffered && (
+              <OfferButton currentUser={currentUser!} listing={listing} />
+            )}
+            {!isOwner && currentUserHasOffered && (
+              <Link
+                className="w-full"
+                href={`/dashboard/inbox/${listing.listingUserId}`}
+              >
+                <Button className="w-full">View My Offer</Button>
+              </Link>
+            )}
           </div>
-        </div>
-        <div className="h-[50vh] w-full bg-slate-200 rounded-lg shadow-sm flex">
-          <h1 className="mx-auto my-auto text-slate-900 text-2xl">
-            Image Placeholder
-          </h1>
         </div>
       </div>
       {isOwner && (
@@ -96,6 +118,43 @@ export default async function ListingDetail({ params: { listingId } }: Params) {
                 : `No offers yet.`
             }
           />
+          <div className="flex flex-col gap-x-4 my-4">
+            {listing.Offer.length > 0 &&
+              listing.Offer.map((offer) => {
+                return (
+                  // TODO: Some day standardize the appearance of all these cards
+                  // so they're not all different
+                  // (Need the same border, padding, border radius, and shadow)
+                  <div
+                    className="w-full rounded-md border border-slate-200 p-4 shadow-sm flex flex-row"
+                    key={offer.id}
+                  >
+                    <div className="flex flex-col gap-y-2">
+                      <h2 className="text-3xl font-medium">
+                        ${offer.offerPrice}
+                      </h2>
+                      <p className="text-xs text-slate-500">
+                        Posted{" "}
+                        {new Date(listing.listedDate).toLocaleDateString()}
+                      </p>
+                      <p className="text-slate-700">{offer.offerMessage}</p>
+                      <FarmerPreview {...offer.offerUser} />
+                    </div>
+                    <Link
+                      className="ml-auto my-auto"
+                      href={`/dashboard/inbox/${offer.offerUserId}`}
+                    >
+                      <Button>
+                        Message{" "}
+                        {offer.offerUser.name
+                          ? offer.offerUser.name.split(" ")[0]
+                          : "User"}
+                      </Button>
+                    </Link>
+                  </div>
+                );
+              })}
+          </div>
         </div>
       )}
     </Page>
