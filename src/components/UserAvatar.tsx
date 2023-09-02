@@ -1,22 +1,20 @@
-"use server";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
-import { prisma } from "@/lib/prisma";
+import type { User } from "@prisma/client";
 
 export default async function UserAvatar({
-  userId,
+  user,
   className,
 }: {
-  userId: string;
+  user: User;
   className?: string;
 }) {
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-  });
   return (
     <Avatar className={className}>
-      <AvatarImage src={user?.image!} />
+      <AvatarImage
+        src={user?.image!}
+        // So that Google photos work
+        referrerPolicy="no-referrer"
+      />
       <AvatarFallback />
     </Avatar>
   );

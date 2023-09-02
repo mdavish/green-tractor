@@ -43,8 +43,15 @@ export default async function getConversationByUserId(userId: string) {
       ],
     },
     include: {
-      listing: true,
+      offerUser: true,
+      listing: {
+        include: {
+          listingUser: true,
+        },
+      },
     },
   });
   return offers;
 }
+
+export type Conversation = Awaited<ReturnType<typeof getConversationByUserId>>;

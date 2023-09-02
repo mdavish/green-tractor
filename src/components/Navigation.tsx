@@ -111,7 +111,7 @@ export default function Navigation({ className }: { className?: string }) {
             ⌘K
           </div>
         </Button>
-        <div className="md:mt-10 flex flex-row md:flex-col gap-y-4">
+        <div className="md:mt-6 flex flex-row md:flex-col gap-y-4">
           {navItems.map((item) => {
             // A path name is active if contains the href
             // Except for the home page, which is active if the path name is exactly the href
