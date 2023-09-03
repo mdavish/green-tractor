@@ -1,6 +1,6 @@
 "use client";
 import { Listing, User, Offer } from "@prisma/client";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -20,11 +20,11 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { OfferFormSchema, type OfferFormData } from "@/schemas/Offer";
-import { Textarea } from "./ui/textarea";
-import { Input } from "./ui/input";
+import { Textarea } from "../ui/textarea";
+import { Input } from "../ui/input";
 import { useTransition, useState } from "react";
 import createOffer from "@/actions/createOffer";
-import { useToast } from "./ui/use-toast";
+import { useToast } from "../ui/use-toast";
 
 interface OfferButtonProps {
   buttonText?: string;

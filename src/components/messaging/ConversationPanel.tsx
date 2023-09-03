@@ -9,7 +9,7 @@ import startStopTyping from "@/actions/startStopTyping";
 import { pusherClient } from "@/lib/pusher";
 import { motion } from "framer-motion";
 import { User } from "@prisma/client";
-import { ScrollArea } from "./ui/scroll-area";
+import { ScrollArea } from "../ui/scroll-area";
 
 export default function ConversationPanel({
   conversation,

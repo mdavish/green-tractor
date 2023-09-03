@@ -1,10 +1,12 @@
 import type { ConversationElement } from "@/lib/db/getConversationByUserId";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
-import { Button } from "./ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import { Button } from "../ui/button";
 import { motion } from "framer-motion";
-import FormattedDate from "./FormattedDate";
+import FormattedDate from "../FormattedDate";
+import AcceptOfferButton from "../buttons/AcceptOfferButton";
+import DeclineOfferButton from "../buttons/DeclineOfferButton";
 
 export default function ConversationElementBubble({
   conversationElement,
@@ -73,8 +75,8 @@ export default function ConversationElementBubble({
           </div>
           {!isFromCurrentUser && (
             <div className="flex flex-row gap-x-2 mt-2">
-              <Button>Accept</Button>
-              <Button variant="destructive">Decline</Button>
+              <AcceptOfferButton offer={conversationElement} />
+              <DeclineOfferButton offer={conversationElement} />
             </div>
           )}
         </div>

@@ -4,7 +4,7 @@ import { Listing, User, Offer } from "@prisma/client";
 import { haversineDistance } from "@/lib/utils";
 import { FaExclamationCircle } from "react-icons/fa";
 import { Button } from "./ui/button";
-import OfferButton from "./OfferButton";
+import OfferButton from "./buttons/OfferButton";
 
 interface ListingPreviewProps {
   listing: Listing & {

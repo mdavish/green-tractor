@@ -37,12 +37,12 @@ model Session {
 }
 
 model User {
-  id                String    @id @default(cuid())
+  id                String        @id @default(cuid())
   stripeAccountId   String?
   stripeAccountLink String?
   name              String?
   profile           String?
-  email             String?   @unique
+  email             String?       @unique
   emailVerified     DateTime?
   image             String?
   accounts          Account[]
@@ -59,8 +59,9 @@ model User {
   latitude          Float?
   longitude         Float?
   Offer             Offer[]
-  messagesTo        Message[] @relation("MessageToUser")
-  messagesFrom      Message[] @relation("MessageFromUser")
+  messagesTo        Message[]     @relation("MessageToUser")
+  messagesFrom      Message[]     @relation("MessageFromUser")
+  OfferUpdates      OfferUpdate[]
 }
 
 model VerificationToken {
@@ -88,23 +89,39 @@ model Listing {
 enum OfferStatus {
   OPEN // The offer has been submitted, but the seller has not yet responded
   REJECTED // The seller has rejected the offer
+  COUNTERED // The seller has countered the offer
   ACCEPTED // The offer has been accepted, but payment has not yet been received
   PAID // The offer has been accepted and payment has been received
   CANCELLED // The offer was accepted, but the buyer cancelled the offer
 }
 
 model Offer {
-  id                 String      @id @default(cuid())
+  id                 String        @id @default(cuid())
   offerDate          DateTime
   offerMessage       String
   offerPrice         Float
-  offerPriceCurrency String?     @default("USD")
+  offerPriceCurrency String?       @default("USD")
   offerUserId        String
-  offerUser          User        @relation(fields: [offerUserId], references: [id], onDelete: Cascade)
+  offerUser          User          @relation(fields: [offerUserId], references: [id], onDelete: Cascade)
   listingId          String
-  listing            Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  status             OfferStatus @default(OPEN)
-  seen               Boolean?    @default(false)
+  listing            Listing       @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  status             OfferStatus   @default(OPEN)
+  seen               Boolean?      @default(false)
+  OfferUpdates       OfferUpdate[]
+}
+
+model OfferUpdate {
+  id          String      @id @default(cuid())
+  offerId     String
+  offer       Offer       @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  // The user who made the update (this could be either the buyer or the seller)
+  actorUserId String
+  actorUser   User        @relation(fields: [actorUserId], references: [id], onDelete: Cascade)
+  seen        Boolean?    @default(false)
+  updatedAt   DateTime    @default(now())
+  newStatus   OfferStatus
+  newPrice    Float?
+  message     String?
 }
 
 model Message {

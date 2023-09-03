@@ -1,7 +1,6 @@
 import getAllConversations from "@/lib/db/getAllConversations";
-import { ConversationsSideBar } from "./ConversationsSideBar";
+import { ConversationsSideBar } from "@/components/messaging/ConversationsSideBar";
 import { redirect } from "next/navigation";
-import { useNotifications } from "@/components/providers/NotificationsProvider";
 
 export default async function InboxPage({
   params,

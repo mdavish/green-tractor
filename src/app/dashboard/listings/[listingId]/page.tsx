@@ -8,7 +8,7 @@ import Pill from "@/components/Pill";
 import StaticMap from "@/components/StaticMap";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import OfferButton from "@/components/OfferButton";
+import OfferButton from "@/components/buttons/OfferButton";
 interface Params {
   params: {
     listingId: string;

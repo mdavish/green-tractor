@@ -1,5 +1,5 @@
 import getConversationByUserId from "@/lib/db/getConversationByUserId";
-import ConversationPanel from "@/components/ConversationPanel";
+import ConversationPanel from "@/components/messaging/ConversationPanel";
 import { getCurrentUser } from "@/lib/auth";
 import getUserById from "@/lib/db/getUserById";
 
