@@ -3,23 +3,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
-
-function FormattedDate({ date }: { date: Date }) {
-  /* Follow the format 9/2/23 12:45 pm */
-  return (
-    <span className="text-xs text-slate-600 font-normal">
-      {" "}
-      {date.toLocaleString("en-US", {
-        month: "numeric",
-        day: "numeric",
-        year: "2-digit",
-        hour: "numeric",
-        minute: "numeric",
-        hour12: true,
-      })}
-    </span>
-  );
-}
+import { motion } from "framer-motion";
+import FormattedDate from "./FormattedDate";
 
 export default function ConversationElementBubble({
   conversationElement,
@@ -46,6 +31,9 @@ export default function ConversationElementBubble({
   const sharedStyle = "text-sm text-slate-800 px-4 py-3";
 
   if (type === "offer") {
+    // TODO: Fix this
+    // Something is going wrong with the naming
+    // (It's never showing the other user's name)
     const offererName = isFromCurrentUser
       ? "You"
       : elementUser.name?.split(" ")[0];
@@ -53,7 +41,10 @@ export default function ConversationElementBubble({
       ? elementUser.name?.split(" ")[0]
       : "you";
     return (
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 10 }}
         className={cn(
           sharedStyle,
           "bg-slate-50 rounded-xl flex flex-row gap-x-4"
@@ -70,7 +61,7 @@ export default function ConversationElementBubble({
             {isFromCurrentUser ? "your" : "their"} listing:{" "}
             <Link
               className="font-semibold hover:underline cursor-pointer"
-              href={`/listings/${conversationElement.listing.id}`}
+              href={`/dashboard/listings/${conversationElement.listing.id}`}
             >
               {conversationElement.listing.title}
             </Link>{" "}
@@ -87,13 +78,18 @@ export default function ConversationElementBubble({
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (type === "message") {
     return (
-      <div className={cn(sharedStyle, "flex flex-row gap-x-2")}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 10 }}
+        className={cn(sharedStyle, "flex flex-row gap-x-2")}
+      >
         <Avatar>
           <AvatarImage src={elementUser.image!} referrerPolicy="no-referrer" />
           <AvatarFallback />
@@ -105,7 +101,7 @@ export default function ConversationElementBubble({
           </div>
           <div>{conversationElement.message}</div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 }

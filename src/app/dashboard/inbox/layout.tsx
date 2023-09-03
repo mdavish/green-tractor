@@ -18,7 +18,7 @@ export default async function InboxPage({
   return (
     <div className="w-full h-full flex flex-row">
       <div className="w-1/3 max-w-lg shrink-0 h-full border-r border-slate-100 flex flex-col divide-y divide-slate-200">
-        <div className="p-4">
+        <div className="p-4 mb-2">
           <h2 className="font-normal text-xl text-slate-900">Conversations</h2>
         </div>
         {allConversations.length === 0 && (

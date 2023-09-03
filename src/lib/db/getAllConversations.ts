@@ -25,25 +25,6 @@ export default async function getAllConversations(): Promise<Conversation[]> {
     throw new Error("Not authenticated");
   }
 
-  // OLD But keeping it here for reference
-  // return await prisma.$queryRaw`
-  // SELECT
-  //   "Offer"."id" AS "offerId",
-  //   "Offer"."offerDate" AS "offerDate",
-  //   "Offer"."offerUserId" AS "offerUserId",
-  //   "Offer"."listingId" AS "offerListingId",
-  //   "Offer"."offerPrice" AS "offerPrice",
-  //   "Offer"."offerMessage" AS "offerMessage",
-  //   "Listing"."id" AS "listingId",
-  //   "Listing"."title" AS "title",
-  //   "Listing"."description" AS "description",
-  //   "Listing"."listingUserId" AS "listingUserId"
-  // FROM public."Offer"
-  //   INNER JOIN public."Listing" ON "Offer"."listingId" = "Listing"."id"
-  // WHERE
-  //   "Offer"."offerUserId" = ${currentUser.id}
-  // `;
-
   const offersToOrFrom = await prisma.offer.findMany({
     where: {
       OR: [
@@ -67,7 +48,24 @@ export default async function getAllConversations(): Promise<Conversation[]> {
     },
   });
 
-  // Find the latest message for each other user
+  const messagesToOrFrom = await prisma.message.findMany({
+    where: {
+      OR: [
+        {
+          fromUserId: currentUser.id,
+        },
+        {
+          toUserId: currentUser.id,
+        },
+      ],
+    },
+    include: {
+      fromUser: true,
+      toUser: true,
+    },
+  });
+
+  // Find the latest message OR offer for each other other user
   const conversations: Conversation[] = [];
   offersToOrFrom.forEach((offer) => {
     const otherUserId =
@@ -108,5 +106,45 @@ export default async function getAllConversations(): Promise<Conversation[]> {
       };
     }
   });
+  messagesToOrFrom.forEach((message) => {
+    const otherUserId =
+      message.fromUserId === currentUser.id
+        ? message.toUserId
+        : message.fromUserId;
+    const conversation = conversations.find(
+      (c) => c.otherUserId === otherUserId
+    );
+    if (!conversation) {
+      conversations.push({
+        otherUserId,
+        otherUser: {
+          id:
+            message.fromUserId === currentUser.id
+              ? message.toUserId
+              : message.fromUserId,
+          name:
+            message.fromUserId === currentUser.id
+              ? message.toUser.name
+              : message.fromUser.name,
+          image:
+            message.fromUserId === currentUser.id
+              ? message.toUser.image
+              : message.fromUser.image,
+        },
+        latestOffer: {
+          offerId: "",
+          offerMessage: message.message,
+          offerDate: message.sentAt,
+        },
+      });
+    } else if (conversation.latestOffer.offerDate < message.sentAt) {
+      conversation.latestOffer = {
+        offerId: "",
+        offerMessage: message.message,
+        offerDate: message.sentAt,
+      };
+    }
+  });
+
   return conversations;
 }

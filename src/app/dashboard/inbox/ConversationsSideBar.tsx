@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import FormattedDate from "@/components/FormattedDate";
 
 export function ConversationsSideBar({
   allConversations,
@@ -12,13 +13,13 @@ export function ConversationsSideBar({
 }) {
   const pathname = usePathname();
   return (
-    <div className="flex flex-col divide-y w-full">
+    <div className="flex flex-col w-full">
       {allConversations.map((conv) => {
         return (
           <Link
             href={`/dashboard/inbox/${conv.otherUserId}`}
             className={cn(
-              "p-4 hover:bg-slate-100 cursor-pointer overflow-hidden text-sm overflow-ellipsis whitespace-nowrap flex flex-row gap-x-2",
+              "rounded-lg mx-2 my-1 py-4 px-3 hover:bg-slate-100 cursor-pointer overflow-hidden text-sm overflow-ellipsis whitespace-nowrap flex flex-row gap-x-2",
               pathname.endsWith(conv.otherUserId) && "bg-slate-100"
             )}
             key={conv.otherUserId}
@@ -27,9 +28,13 @@ export function ConversationsSideBar({
               <AvatarImage src={conv.otherUser.image!} />
               <AvatarFallback />
             </Avatar>
-            <div className="flex flex-col gap-x-1">
-              <h2>{conv.otherUser.name}</h2>
-              <p className="text-xs italic text-slate-600 whitespace-normal line-clamp-2">
+            {/* TODO: Update this to read from messages */}
+            <div className="flex flex-col gap-y-1 text-sm">
+              <h2 className="font-medium ">
+                {conv.otherUser.name}
+                <FormattedDate date={conv.latestOffer.offerDate} />
+              </h2>
+              <p className="text-sm text-slate-600 whitespace-normal line-clamp-2">
                 {conv.latestOffer.offerMessage}
               </p>
             </div>

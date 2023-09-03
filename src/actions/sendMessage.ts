@@ -1,7 +1,7 @@
 "use server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { pusherServer } from "@/lib/pusher";
 
 export default async function sendMessage({
   message,
@@ -24,7 +24,14 @@ export default async function sendMessage({
     },
   });
 
-  revalidatePath(`/dashboard/inbox/${toUserId}`);
+  const incomingChannel = `messagesFrom-${user.id}-to-${toUserId}`;
+  console.log();
+  const pusherResponse = await pusherServer.trigger(
+    incomingChannel,
+    "newMessage",
+    createdMessage
+  );
 
+  // Not revalidating the path here because it's not a static page
   return createdMessage;
 }
