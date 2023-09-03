@@ -8,8 +8,8 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   callbacks: {
     async redirect({ url, baseUrl }) {
-      return "/dashboard"
-    }
+      return "/dashboard";
+    },
   },
   providers: [
     GoogleProvider({
@@ -19,12 +19,20 @@ export const authOptions: NextAuthOptions = {
   ],
 };
 
-export async function getCurrentUser()  {
+export async function getCurrentSession() {
+  // This is a more lightweight function for when
+  // you don't also need to do a database lookup
+  // and the information on the token suffices
   const session = await getServerSession(authOptions);
-  if (!session) return null
+  return session;
+}
+
+export async function getCurrentUser() {
+  const session = await getServerSession(authOptions);
+  if (!session) return null;
   const currentUserEmail = session.user?.email!;
   const currentUser = await prisma.user.findUnique({
     where: { email: currentUserEmail },
   });
-  return currentUser
+  return currentUser;
 }

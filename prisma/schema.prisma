@@ -104,6 +104,7 @@ model Offer {
   listingId          String
   listing            Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
   status             OfferStatus @default(OPEN)
+  seen               Boolean?    @default(false)
 }
 
 model Message {
@@ -114,4 +115,5 @@ model Message {
   sentAt     DateTime
   toUser     User     @relation("MessageToUser", fields: [toUserId], references: [id], onDelete: Cascade)
   fromUser   User     @relation("MessageFromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
+  seen       Boolean? @default(false)
 }

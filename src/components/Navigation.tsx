@@ -16,50 +16,55 @@ import {
 } from "@/components/ui/command";
 import { Button } from "./ui/button";
 import Logo from "./Logo";
+import { useNotifications } from "./providers/NotificationsProvider";
+import NotificationBadge from "./NotificationBadge";
 interface NavItem {
   name: string;
   href: string;
   icon: React.ReactNode;
   onMobile?: boolean;
+  unreadNotifications?: number;
 }
-
-const navItems: NavItem[] = [
-  {
-    name: "Home",
-    href: "/dashboard",
-    icon: <FaHome />,
-    onMobile: true,
-  },
-  {
-    name: "Inbox",
-    href: "/dashboard/inbox",
-    icon: <FaInbox />,
-    onMobile: true,
-  },
-  {
-    name: "My Listings",
-    href: "/dashboard/my-listings",
-    icon: <FaMoneyBillWave />,
-    onMobile: true,
-  },
-  {
-    name: "Farmers",
-    href: "/dashboard/farmers",
-    icon: <GiFarmer />,
-    onMobile: false,
-  },
-  {
-    name: "My Profile",
-    href: "/dashboard/profile",
-    icon: <FaUserEdit />,
-    onMobile: true,
-  },
-];
 
 export default function Navigation({ className }: { className?: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const { notifications } = useNotifications();
+
+  const navItems: NavItem[] = [
+    {
+      name: "Home",
+      href: "/dashboard",
+      icon: <FaHome />,
+      onMobile: true,
+    },
+    {
+      name: "Inbox",
+      href: "/dashboard/inbox",
+      icon: <FaInbox />,
+      onMobile: true,
+      unreadNotifications: notifications.totalUnreads,
+    },
+    {
+      name: "My Listings",
+      href: "/dashboard/my-listings",
+      icon: <FaMoneyBillWave />,
+      onMobile: true,
+    },
+    {
+      name: "Farmers",
+      href: "/dashboard/farmers",
+      icon: <GiFarmer />,
+      onMobile: false,
+    },
+    {
+      name: "My Profile",
+      href: "/dashboard/profile",
+      icon: <FaUserEdit />,
+      onMobile: true,
+    },
+  ];
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -107,7 +112,7 @@ export default function Navigation({ className }: { className?: string }) {
           variant={"outline"}
         >
           <div className="mr-auto">Search...</div>{" "}
-          <div className="ml-auto text-slate-500 text-xs my-auto border border-slate-200 group-hover:borer-slate-300 rounded-md px-1 py-0.5">
+          <div className="m1l-auto text-slate-500 text-xs my-auto border border-slate-200 group-hover:borer-slate-300 rounded-md px-1 py-0.5">
             ⌘K
           </div>
         </Button>
@@ -132,6 +137,12 @@ export default function Navigation({ className }: { className?: string }) {
                   <span className="mx-auto md:mx-0">{item.icon}</span>
                 </div>
                 <h2 className="hidden md:block">{item.name}</h2>
+                {item.unreadNotifications && (
+                  <NotificationBadge
+                    n={notifications.totalUnreads}
+                    className="my-auto ml-auto mr-1"
+                  />
+                )}
               </Link>
             );
           })}

@@ -9,8 +9,10 @@ export default async function startStopTyping({
 }) {
   const currentUser = await getCurrentUser();
   if (!currentUser) return;
+  // TODO: Make this a channel that is unique to the conversation
+  // (Right now, it's a channel that is unique to the user)
   const channelName = `isTyping-${currentUser.id}`;
-  const pusherResponse = await pusherServer.trigger(channelName, "typing", {
+  await pusherServer.trigger(channelName, "typing", {
     isTyping,
   });
 }

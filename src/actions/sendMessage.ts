@@ -22,16 +22,20 @@ export default async function sendMessage({
       sentAt: new Date(),
       fromUserId: user.id,
     },
+    include: {
+      fromUser: true,
+      toUser: true,
+    },
   });
 
-  const incomingChannel = `messagesFrom-${user.id}-to-${toUserId}`;
-  console.log();
-  const pusherResponse = await pusherServer.trigger(
-    incomingChannel,
-    "newMessage",
-    createdMessage
-  );
+  const twoWayChannel = `messagesFrom-${user.id}-to-${toUserId}`;
+  const oneWayChannel = `messagesTo-${toUserId}`;
+
+  await pusherServer.trigger(twoWayChannel, "newMessage", createdMessage);
+  await pusherServer.trigger(oneWayChannel, "newMessage", createdMessage);
 
   // Not revalidating the path here because it's not a static page
   return createdMessage;
 }
+
+export type SendMessageResponse = Awaited<ReturnType<typeof sendMessage>>;

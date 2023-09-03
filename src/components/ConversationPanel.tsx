@@ -28,6 +28,16 @@ export default function ConversationPanel({
     useState<Conversation>(conversation);
   const bottomDivRef = useRef<HTMLDivElement>(null);
 
+  // On the initial page load, the bottom div should be scrolled immediately into view
+  // There should be no animation
+  useEffect(() => {
+    if (bottomDivRef.current) {
+      bottomDivRef.current.scrollIntoView({ behavior: "auto" });
+    }
+  }, []);
+
+  // When a new message is sent or received, scroll the bottom div into view
+  // with a smooth animation
   useEffect(() => {
     if (bottomDivRef.current) {
       bottomDivRef.current.scrollIntoView({ behavior: "smooth" });
@@ -60,11 +70,10 @@ export default function ConversationPanel({
           fromUserId: data.fromUserId,
           id: data.id,
           message: data.message,
-          // Parse the date string into a Date object
-          // Date string looks like this: 2023-09-03T16:51:22.495Z
           sentAt: new Date(data.sentAt),
           toUserId: data.toUserId,
           toUser: currentUser,
+          seen: data.seen,
         },
       ]);
     });
@@ -80,6 +89,7 @@ export default function ConversationPanel({
           sentAt: data.sentAt,
           toUserId: data.toUserId,
           toUser: otherUser,
+          seen: data.seen,
         },
       ]);
     });
