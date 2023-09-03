@@ -1,88 +1,80 @@
 "use client";
+import { useState, useEffect, useTransition } from "react";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import UserAvatar from "@/components/UserAvatar";
 import type { Conversation } from "@/lib/db/getConversationByUserId";
+import ConversationElementBubble from "./ConversationElementBubble";
+import sendMessage from "@/actions/sendMessage";
 
 export default function ConversationPanel({
-  offers,
+  conversation,
   userId,
 }: {
-  offers: Conversation; // This is confusing - in the future, this will be a union of offers and messages and other things
+  conversation: Conversation; // This is confusing - in the future, this will be a union of offers and messages and other things
   userId: string; // The OTHER user's ID, not the current user
 }) {
+  const [isTyping, setIsTyping] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const [isPending, startTransition] = useTransition();
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    setIsTyping(true);
+    if (event.key === "Enter") {
+      startTransition(async () => {
+        await sendMessage({ toUserId: userId, message });
+      });
+      setMessage("");
+    }
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsTyping(true);
+    setMessage(event.target.value);
+  };
+
+  useEffect(() => {
+    if (isTyping) {
+      console.log("This is where I would send a message to the server");
+    } else {
+      console.log("This is where I would send a message to the server");
+    }
+  }, [isTyping]);
+
+  // Set not typing after 5 seconds
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsTyping(false);
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, [isTyping]);
+
   return (
     <div className="w-full h-full flex flex-col justify-end">
-      <div className="flex flex-col gap-y-4 p-4 w-full">
-        {offers.map((offer) => {
-          const isFromUser = offer.offerUserId !== userId;
-          return (
-            <div
-              key={offer.id}
-              className={cn(
-                "flex flex-row py-3 px-6 border-slate-200 text-sm w-fit rounded-lg shadow-sm max-w-md relative mb-1",
-                isFromUser ? "ml-auto bg-primary text-white" : "bg-slate-100"
-              )}
-            >
-              <UserAvatar
-                user={offer.offerUser}
-                className={cn(
-                  "absolute w-8 h-8 -bottom-4 border border-white",
-                  isFromUser ? "-right-2" : "-left-2"
-                )}
-              />
-              <div className="flex flex-col gap-y-2">
-                <p className="text-base">
-                  {/* TODO: Get the other user's name */}
-                  {isFromUser ? "You" : offer.offerUser.name} made an offer on{" "}
-                  {` `}
-                  <Link
-                    className="group"
-                    href={`/dashboard/listings/${offer.listingId}`}
-                  >
-                    <span
-                      className={cn(
-                        "group-hover:underline",
-                        !isFromUser ? "text-primary " : "text-white"
-                      )}
-                    >
-                      {offer.listing.title}
-                    </span>
-                  </Link>
-                </p>
-                <p>{offer.offerMessage}</p>
-                <p
-                  className={cn(
-                    "text-xs ",
-                    isFromUser ? "text-slate-200" : "text-slate-500"
-                  )}
-                >
-                  Price: ${offer.offerPrice}
-                </p>
-                {!isFromUser && (
-                  <div className="flex flex-row gap-x-2 mt-2">
-                    <Button>Accept</Button>
-                    <Button variant="destructive">Decline</Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      {offers.length === 0 && (
-        <div>
+      {conversation.length === 0 && (
+        <div className="mx-auto w-fit p-4 text-slate-700">
           <p>You haven&apos;t had any conversation with this user yet.</p>
         </div>
       )}
+      <div className="flex flex-col justify-end gap-y-3 px-4 py-4">
+        {conversation.map((conversationElement, index) => {
+          const { type } = conversationElement;
+          // The user ID who originated this conversation element
+          // (I.e. the user who sent the message or made the offer)
+          return (
+            <ConversationElementBubble
+              key={`${conversationElement.type}-${conversationElement.id}`}
+              otherUserId={userId}
+              conversationElement={conversationElement}
+              index={index}
+            />
+          );
+        })}
+      </div>
       <div className="w-full h-fit p-3 border-t">
-        {/* Disabling this until we have interactive messaging */}
         <Input
-          onSubmit={(event) => {
-            console.log(event);
-          }}
+          value={message}
+          onKeyDown={handleKeyDown}
+          onChange={handleChange}
           placeholder="Send a message"
         />
       </div>
