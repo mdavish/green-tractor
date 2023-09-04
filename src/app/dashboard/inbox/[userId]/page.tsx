@@ -2,6 +2,7 @@ import getConversationByUserId from "@/lib/db/getConversationByUserId";
 import ConversationPanel from "@/components/messaging/ConversationPanel";
 import { getCurrentUser } from "@/lib/auth";
 import getUserById from "@/lib/db/getUserById";
+import markConversationSeen from "@/actions/markConversationSeen";
 
 interface Params {
   params: {
@@ -14,6 +15,7 @@ export default async function ConversationPage({ params: { userId } }: Params) {
   // In the future, they will be a union of offers and messages and other things
   const conversation = await getConversationByUserId(userId);
   const currentUser = await getCurrentUser();
+  await markConversationSeen(userId);
   if (!currentUser) {
     throw new Error("No current user");
   }

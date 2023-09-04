@@ -6,6 +6,7 @@ import { Message } from "@prisma/client";
 import ConversationElementBubble from "./ConversationElementBubble";
 import sendMessage from "@/actions/sendMessage";
 import startStopTyping from "@/actions/startStopTyping";
+import markConversationSeen from "@/actions/markConversationSeen";
 import { pusherClient } from "@/lib/pusher";
 import { motion } from "framer-motion";
 import { User } from "@prisma/client";
@@ -27,6 +28,13 @@ export default function ConversationPanel({
   const [conversationElements, setConversationElements] =
     useState<Conversation>(conversation);
   const bottomDivRef = useRef<HTMLDivElement>(null);
+
+  // On initial page load, mark the messages as seen
+  useEffect(() => {
+    startTransition(async () => {
+      await markConversationSeen(otherUser.id);
+    });
+  }, []);
 
   // On the initial page load, the bottom div should be scrolled immediately into view
   // There should be no animation

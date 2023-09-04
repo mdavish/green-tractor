@@ -137,12 +137,13 @@ export default function Navigation({ className }: { className?: string }) {
                   <span className="mx-auto md:mx-0">{item.icon}</span>
                 </div>
                 <h2 className="hidden md:block">{item.name}</h2>
-                {item.unreadNotifications && (
-                  <NotificationBadge
-                    n={notifications.totalUnreads}
-                    className="my-auto ml-auto mr-1"
-                  />
-                )}
+                {item.unreadNotifications !== undefined &&
+                  item.unreadNotifications > 0 && (
+                    <NotificationBadge
+                      n={notifications.totalUnreads}
+                      className="hidden md:flex my-auto ml-auto mr-1"
+                    />
+                  )}
               </Link>
             );
           })}
