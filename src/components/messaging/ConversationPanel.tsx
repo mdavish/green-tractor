@@ -2,7 +2,9 @@
 import { useState, useEffect, useRef, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import type { Conversation } from "@/lib/db/getConversationByUserId";
-import { Message } from "@prisma/client";
+import type { Message } from "@prisma/client";
+import type { ExpandedOffer } from "@/actions/createOffer";
+import type { ExpandedOfferUpdate } from "@/actions/updateOffer";
 import ConversationElementBubble from "./ConversationElementBubble";
 import sendMessage from "@/actions/sendMessage";
 import startStopTyping from "@/actions/startStopTyping";
@@ -64,6 +66,7 @@ export default function ConversationPanel({
     };
   }, []);
 
+  // Set up pusher channels for incoming and outgoing messages
   useEffect(() => {
     const incomingChannel = `messagesFrom-${otherUser.id}-to-${currentUser.id}`;
     const outgoingChannel = `messagesFrom-${currentUser.id}-to-${otherUser.id}`;
@@ -108,6 +111,78 @@ export default function ConversationPanel({
     };
   }, []);
 
+  // Set up pusher channels for incoming and outgoing offers
+  useEffect(() => {
+    const incomingChannel = `offersFrom-${otherUser.id}-to-${currentUser.id}`;
+    const outgoingChannel = `offersFrom-${currentUser.id}-to-${otherUser.id}`;
+    const incomingChannelObject = pusherClient.subscribe(incomingChannel);
+    const outgoingChannelObject = pusherClient.subscribe(outgoingChannel);
+    incomingChannelObject.bind("newOffer", (data: ExpandedOffer) => {
+      setConversationElements((conversationElements) => [
+        ...conversationElements,
+        {
+          ...data,
+          type: "offer",
+        },
+      ]);
+    });
+    outgoingChannelObject.bind("newOffer", (data: ExpandedOffer) => {
+      setConversationElements((conversationElements) => [
+        ...conversationElements,
+        {
+          ...data,
+          type: "offer",
+        },
+      ]);
+    });
+    return () => {
+      pusherClient.unsubscribe(incomingChannel);
+      pusherClient.unsubscribe(outgoingChannel);
+      pusherClient.unbind("newOffer");
+    };
+  }, []);
+
+  // Set up pusher channels for incoming and outgoing offer updates
+  useEffect(() => {
+    const incomingChannel = `offerUpdatesFrom-${otherUser.id}-to-${currentUser.id}`;
+    const outgoingChannel = `offerUpdatesFrom-${currentUser.id}-to-${otherUser.id}`;
+    const incomingChannelObject = pusherClient.subscribe(incomingChannel);
+    const outgoingChannelObject = pusherClient.subscribe(outgoingChannel);
+    incomingChannelObject.bind(
+      "newOfferUpdate",
+      (data: ExpandedOfferUpdate) => {
+        {
+          setConversationElements((conversationElements) => [
+            ...conversationElements,
+            {
+              ...data,
+              type: "offerUpdate",
+            },
+          ]);
+        }
+      }
+    );
+    outgoingChannelObject.bind(
+      "newOfferUpdate",
+      (data: ExpandedOfferUpdate) => {
+        {
+          setConversationElements((conversationElements) => [
+            ...conversationElements,
+            {
+              ...data,
+              type: "offerUpdate",
+            },
+          ]);
+        }
+      }
+    );
+    return () => {
+      pusherClient.unsubscribe(incomingChannel);
+      pusherClient.unsubscribe(outgoingChannel);
+      pusherClient.unbind("newOfferUpdate");
+    };
+  }, []);
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     setIsTyping(true);
     if (event.key === "Enter") {
@@ -147,7 +222,7 @@ export default function ConversationPanel({
         </div>
       )}
       <ScrollArea>
-        <div className="flex flex-col justify-end gap-y-2 px-4 py-4 h-full shrink-1 overflow-scroll">
+        <div className="flex flex-col justify-end gap-y-3 px-4 py-4 h-full shrink-1 overflow-scroll max-w-5xl">
           {conversationElements.map((conversationElement, index) => {
             const { type } = conversationElement;
             // The user ID who originated this conversation element
@@ -177,6 +252,7 @@ export default function ConversationPanel({
       </ScrollArea>
       <div className="w-full h-fit p-4 border-t shrink-0">
         <Input
+          className="max-w-5xl rounded-full"
           value={message}
           onKeyDown={handleKeyDown}
           onChange={handleChange}

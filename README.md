@@ -11,5 +11,11 @@ There are a few Pusher channels you need to know about:
 3. `offersFrom-<USER_ID>-to-<OTHER_USER_ID>`: Same thing as #1 except for offers, not messages.
 4. `offersTo-<USER_ID>`: Same thing as #2 except for offers, not messages.
 5. `isTyping-<USER_ID>`: Indicates whether a specific user is typing. Actually, I'm realizing that I messed this up and this should be `isTyping-<USER_ID>-to-<OTHER_USER_ID>`, because right now it'll just show if that user is typing to _anyone_. So that's a mistake. Gotta fix that.
+6. `offerUpdatesFrom-<USER>-to-<OTHER_USER_ID>`: Same thing as #2 except for offer updates
+7. `offerUpdatesTo-<USER>`
+
+In essence, the "two way" channels (`thingsTo-UserA-from-UserB`) are for populating the convesation page, because that page needs to update every time a new conversation element from _either_ user shows up.
+
+Then the "one way" channels (`thingsTo-UserC`) are for toast notifications, because those only need to happen whenever something happens for User C, regardless of whom its from.
 
 You can find some more information about this under `sendMessage.ts`.

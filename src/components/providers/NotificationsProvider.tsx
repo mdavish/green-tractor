@@ -68,6 +68,8 @@ export default function NotificationsProvider({
       };
     });
   };
+
+  // Subscribe to the pusher channel for new messages
   useEffect(() => {
     const incomingChanel = `messagesTo-${currentUser.id}`;
     const channel = pusherClient.subscribe(incomingChanel);
@@ -87,6 +89,55 @@ export default function NotificationsProvider({
     return () => {
       pusherClient.unsubscribe(incomingChanel);
       pusherClient.unbind("newMessage");
+    };
+  }, []);
+
+  // Subscribe to the pusher channel for new offers
+  useEffect(() => {
+    const incomingChanel = `offersTo-${currentUser.id}`;
+    const channel = pusherClient.subscribe(incomingChanel);
+    channel.bind("newOffer", (data: SendMessageResponse) => {
+      toast({
+        title: `New offer from ${data.fromUser.name}`,
+        description: data.message,
+        duration: 5000,
+        action: (
+          <ToastAction altText="View Conversation">
+            <Link href={`/dashboard/inbox/${data.fromUser.id}`}>View</Link>
+          </ToastAction>
+        ),
+      });
+      addUnreadOffer(data.fromUserId);
+    });
+    return () => {
+      pusherClient.unsubscribe(incomingChanel);
+      pusherClient.unbind("newOffer");
+    };
+  }, []);
+
+  // Subscribe to the pusher channel for offer updates
+  useEffect(() => {
+    const incomingChanel = `offerUpdatesTo-${currentUser.id}`;
+    const channel = pusherClient.subscribe(incomingChanel);
+    channel.bind("offerUpdate", (data: SendMessageResponse) => {
+      toast({
+        // TODO: Have a more specific title for this type of notification
+        // (Could copy some of the text from the message we construct in ConversationPanel)
+        title: `Offer update from ${data.fromUser.name}`,
+        description: data.message,
+        duration: 5000,
+        action: (
+          <ToastAction altText="View Conversation">
+            <Link href={`/dashboard/inbox/${data.fromUser.id}`}>View</Link>
+          </ToastAction>
+        ),
+      });
+      // TODO: This should be a different type of notification
+      // addUnreadOffer(data.fromUserId);
+    });
+    return () => {
+      pusherClient.unsubscribe(incomingChanel);
+      pusherClient.unbind("offerUpdate");
     };
   }, []);
 

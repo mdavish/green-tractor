@@ -1,12 +1,55 @@
 "use server";
 import { getCurrentUser } from "@/lib/auth";
-import type { OfferUpdate } from "@prisma/client";
+import type { OfferUpdate, User } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { pusherServer } from "@/lib/pusher";
 
 export type OfferUpdateInput = Omit<
   OfferUpdate,
   "actorUserId" | "id" | "seen" | "updatedAt"
 >;
+
+/**
+ * The reason we need to extract this function is to generate an accurate return type
+ */
+async function createOfferUpdate({
+  currentUser,
+  newStatus,
+  offerId,
+  message,
+  newPrice,
+}: {
+  currentUser: User;
+  newStatus: OfferUpdateInput["newStatus"];
+  offerId: OfferUpdateInput["offerId"];
+  message: OfferUpdateInput["message"];
+  newPrice: OfferUpdateInput["newPrice"];
+}) {
+  return await prisma.offerUpdate.create({
+    data: {
+      actorUserId: currentUser.id,
+      newStatus,
+      offerId,
+      message,
+      newPrice,
+    },
+    include: {
+      actorUser: true,
+      offer: {
+        include: {
+          listing: {
+            include: {
+              listingUser: true,
+            },
+          },
+          offerUser: true,
+        },
+      },
+    },
+  });
+}
+
+export type ExpandedOfferUpdate = Awaited<ReturnType<typeof createOfferUpdate>>;
 
 export type OfferUpdateReturn =
   | {
@@ -15,7 +58,7 @@ export type OfferUpdateReturn =
     }
   | ({
       status: "success";
-    } & OfferUpdate);
+    } & ExpandedOfferUpdate);
 
 export default async function updateOffer({
   newStatus,
@@ -82,26 +125,33 @@ export default async function updateOffer({
     }
   }
 
-  const offerUpdate = await prisma.offerUpdate.create({
-    data: {
-      actorUserId: currentUser.id,
-      newStatus,
-      offerId,
-      message,
-      newPrice,
-    },
+  const offerUpdate = await createOfferUpdate({
+    currentUser,
+    newStatus,
+    offerId,
+    message,
+    newPrice,
   });
 
   // TODO: Eventually we should make it so that we don't have to update both records
   // We should just be able to infer the offer's status by the latest offerUpdate
-  const foo = await prisma.offer.update({
+  const offer = await prisma.offer.update({
     where: { id: offerId },
     data: {
       status: newStatus,
     },
   });
 
-  console.log({ foo, offerUpdate });
+  // TODO: Confirm this logic actually makes sense.
+  // When an offer update is made, who do you need to tell?
+  // The offer's owner (if they weren't the one who made the update)
+  // The listing's owner (if they weren't the one who made the update)
+  // And that's it, right?
+  const twoWayChannel = `offerUpdatesFrom-${currentUser.id}-to-${offer.offerUserId}`;
+  const oneWayChannel = `offerUpdatesTo-${offer.offerUserId}`;
+
+  await pusherServer.trigger(twoWayChannel, "newOfferUpdate", offerUpdate);
+  await pusherServer.trigger(oneWayChannel, "newOfferUpdate", offerUpdate);
 
   return {
     status: "success",

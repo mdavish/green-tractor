@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import FormattedDate from "../FormattedDate";
 import AcceptOfferButton from "../buttons/AcceptOfferButton";
 import DeclineOfferButton from "../buttons/DeclineOfferButton";
+import type { User } from "@prisma/client";
 
 export default function ConversationElementBubble({
   conversationElement,
@@ -23,10 +24,20 @@ export default function ConversationElementBubble({
 }) {
   const { type } = conversationElement;
 
-  const elementUser =
-    type === "message"
-      ? conversationElement.fromUser
-      : conversationElement.offerUser;
+  let elementUser: User;
+  switch (type) {
+    case "offer":
+      elementUser = conversationElement.offerUser;
+      break;
+    case "message":
+      elementUser = conversationElement.fromUser;
+      break;
+    case "offerUpdate":
+      elementUser = conversationElement.actorUser;
+      break;
+    default:
+      throw new Error("Invalid conversation element type");
+  }
 
   const isFromCurrentUser = elementUser.id !== otherUserId;
 
@@ -42,6 +53,7 @@ export default function ConversationElementBubble({
     const receiverName = isFromCurrentUser
       ? elementUser.name?.split(" ")[0]
       : "you";
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -49,7 +61,7 @@ export default function ConversationElementBubble({
         exit={{ opacity: 0, y: 10 }}
         className={cn(
           sharedStyle,
-          "bg-slate-50 rounded-xl flex flex-row gap-x-4"
+          "bg-slate-100 rounded-xl flex flex-row gap-x-4"
         )}
       >
         <Avatar>
@@ -58,7 +70,7 @@ export default function ConversationElementBubble({
         </Avatar>
         <div className="flex flex-col gap-y-1">
           <FormattedDate date={conversationElement.offerDate} />
-          <div>
+          <div className="text-xs  w-fit">
             {offererName} made {receiverName} an offer on{" "}
             {isFromCurrentUser ? "your" : "their"} listing:{" "}
             <Link
@@ -73,6 +85,7 @@ export default function ConversationElementBubble({
             </span>
             .
           </div>
+          <p className="text-sm">{conversationElement.offerMessage}</p>
           {!isFromCurrentUser && (
             <div className="flex flex-row gap-x-2 mt-2">
               <AcceptOfferButton offer={conversationElement} />
@@ -102,6 +115,88 @@ export default function ConversationElementBubble({
             <FormattedDate date={conversationElement.sentAt} />
           </div>
           <div>{conversationElement.message}</div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (type === "offerUpdate") {
+    const price =
+      conversationElement.newPrice ?? conversationElement.offer.offerPrice;
+
+    const actorIsCurrentUser = conversationElement.actorUserId !== otherUserId;
+    const offerBelongsToCurrentUser =
+      conversationElement.offer.offerUserId !== otherUserId;
+
+    const subjectName = actorIsCurrentUser
+      ? "You"
+      : conversationElement.actorUser.name?.split(" ")[0];
+
+    const objectPosessive = offerBelongsToCurrentUser
+      ? "your"
+      : `${conversationElement.offer.offerUser.name?.split(" ")[0]}'s`;
+
+    let verb: string;
+    switch (conversationElement.newStatus) {
+      case "ACCEPTED":
+        verb = "accepted";
+        break;
+      case "REJECTED":
+        verb = "rejected";
+        break;
+      case "COUNTERED":
+        verb = "countered";
+        break;
+      case "CANCELLED":
+        verb = "cancelled";
+        break;
+      case "OPEN":
+        throw new Error("An offerUpdate shouldn't have an OPEN status");
+      case "PAID":
+        verb = "paid";
+        break;
+      default:
+        throw new Error("Invalid offer status");
+    }
+
+    const message = `${subjectName} ${verb} ${objectPosessive} offer on ${
+      isFromCurrentUser ? "your" : "their"
+    } listing: `;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 10 }}
+        className={cn(
+          sharedStyle,
+          "bg-slate-100 rounded-xl flex flex-row gap-x-4"
+        )}
+      >
+        <Avatar>
+          <AvatarImage src={elementUser.image!} referrerPolicy="no-referrer" />
+          <AvatarFallback />
+        </Avatar>
+        <div className="flex flex-col gap-y-1">
+          <FormattedDate date={conversationElement.updatedAt} />
+          <div className="text-xs  w-fit">
+            {message}
+            <Link
+              className="font-semibold hover:underline cursor-pointer"
+              href={`/dashboard/listings/${conversationElement.offer.listing.id}`}
+            >
+              {conversationElement.offer.listing.title}
+            </Link>{" "}
+            for <span className="font-semibold">${price.toLocaleString()}</span>
+            .
+          </div>
+          <p className="text-sm">{conversationElement.message}</p>
+          {conversationElement.newStatus === "ACCEPTED" &&
+            !actorIsCurrentUser && (
+              <div className="flex flex-row gap-x-2 mt-2">
+                <Button className="w-full max-w-sm">Proceed to Payment</Button>
+              </div>
+            )}
         </div>
       </motion.div>
     );

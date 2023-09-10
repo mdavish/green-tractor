@@ -4,6 +4,10 @@ import {
   getMessagesByUserId,
   type FetchedMessages,
 } from "./getMessagesByUserId";
+import {
+  getOfferUpdatesByUserId,
+  type FetchedOfferUpdates,
+} from "./getOfferUpdatesByUserId";
 
 export type FetchedOfferWithType = FetchedOffers[number] & {
   type: "offer";
@@ -13,7 +17,27 @@ export type FetchedMessageWithType = FetchedMessages[number] & {
   type: "message";
 };
 
-export type ConversationElement = FetchedOfferWithType | FetchedMessageWithType;
+export type FetchedOfferUpdateWithType = FetchedOfferUpdates[number] & {
+  type: "offerUpdate";
+};
+
+export type ConversationElement =
+  | FetchedOfferWithType
+  | FetchedMessageWithType
+  | FetchedOfferUpdateWithType;
+
+export function getConversationElementTimestamp(element: ConversationElement) {
+  switch (element.type) {
+    case "offer":
+      return element.offerDate;
+    case "message":
+      return element.sentAt;
+    case "offerUpdate":
+      return element.updatedAt;
+    default:
+      throw new Error("Invalid conversation element type");
+  }
+}
 
 export default async function getConversationByUserId(
   userId: string
@@ -39,16 +63,26 @@ export default async function getConversationByUserId(
       type: "message",
     })
   );
+  const offerUpdates = await getOfferUpdatesByUserId(userId, currentUser);
+  const offerUpdatesWithType: FetchedOfferUpdateWithType[] = offerUpdates.map(
+    (offerUpdate) => ({
+      ...offerUpdate,
+      type: "offerUpdate",
+    })
+  );
 
   const conversation: ConversationElement[] = [
     ...offersWithType,
     ...messagesWithType,
+    ...offerUpdatesWithType,
   ];
 
+  // NOTE: Ideally this would happen in SQL, but Prisma makes that hard
+  // (Prisma requires three separate queries for each type of conversation element)
   // Sort the conversation by date
   conversation.sort((a, b) => {
-    const aTimestamp = a.type === "message" ? a.sentAt : a.offerDate;
-    const bTimestamp = b.type === "message" ? b.sentAt : b.offerDate;
+    const aTimestamp = getConversationElementTimestamp(a);
+    const bTimestamp = getConversationElementTimestamp(b);
     if (aTimestamp < bTimestamp) {
       return -1;
     }

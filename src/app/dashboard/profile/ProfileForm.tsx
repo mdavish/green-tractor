@@ -102,7 +102,6 @@ export function ProfileForm({
                       form.setValue("address", address);
                       // But you also need to set the individual fields
                       form.setValue("address.city", address.city);
-                      console.log("address.region", address.region);
                       form.setValue("address.region", address.region);
                       form.setValue("address.postalCode", address.postalCode);
                     }}
