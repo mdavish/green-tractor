@@ -23,9 +23,6 @@ export default async function createCheckoutSession(
     throw new Error("You must be logged in to make a purchase");
   }
 
-  console.log("Here I am in the function");
-  console.dir(offerUpdate, { depth: null });
-
   if (offerUpdate.offer.listing.listingUser.stripeAccountId === null) {
     console.error(`
     The user with id ${offerUpdate.offer.listing.listingUser.id} does not have a Stripe account.
@@ -38,11 +35,15 @@ export default async function createCheckoutSession(
     };
   }
 
+  const price = offerUpdate.newPrice ?? offerUpdate.offer.offerPrice;
+
   const session = await stripeClient.checkout.sessions.create({
     mode: "payment",
     line_items: [
       {
+        quantity: 1,
         price_data: {
+          unit_amount: price * 100,
           currency: "usd",
           product_data: {
             name: offerUpdate.offer.listing.title,
@@ -56,8 +57,9 @@ export default async function createCheckoutSession(
       },
     ],
     payment_intent_data: {
-      application_fee_amount:
-        offerUpdate.newPrice ?? offerUpdate.offer.offerPrice,
+      // TODO: Revisit the 5% fee
+      // (This is the most important assumption in our whole business model)
+      application_fee_amount: price * 100 * 0.05,
       transfer_data: {
         // TODO: Confirm that this is the correct destination
         destination: offerUpdate.offer.listing.listingUser.stripeAccountId,

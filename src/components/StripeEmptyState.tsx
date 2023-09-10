@@ -10,9 +10,7 @@ export default function StripeEmptyState() {
   const router = useRouter();
 
   const handleStripeSetup = () => {
-    console.log("in the callback");
     startTransition(async () => {
-      console.log("setting up stripe");
       const url = await setupStripe();
       router.push(url);
     });

@@ -18,6 +18,12 @@ export async function addListing({
     throw new Error("No current user");
   }
 
+  if (!currentUser.stripeAccountId) {
+    throw new Error(
+      `User ${currentUser.id} does not have a Stripe account, so they cannot create listings.`
+    );
+  }
+
   // What will this return?
   console.log({ imageUrl });
 
