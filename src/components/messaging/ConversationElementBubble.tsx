@@ -2,12 +2,12 @@ import type { ConversationElement } from "@/lib/db/getConversationByUserId";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
-import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 import FormattedDate from "../FormattedDate";
 import AcceptOfferButton from "../buttons/AcceptOfferButton";
 import DeclineOfferButton from "../buttons/DeclineOfferButton";
 import type { User } from "@prisma/client";
+import PaymentButton from "../buttons/PaymentButton";
 
 export default function ConversationElementBubble({
   conversationElement,
@@ -61,7 +61,8 @@ export default function ConversationElementBubble({
         exit={{ opacity: 0, y: 10 }}
         className={cn(
           sharedStyle,
-          "bg-slate-100 rounded-xl flex flex-row gap-x-4"
+          "bg-slate-100 rounded-xl flex flex-row gap-x-4",
+          className
         )}
       >
         <Avatar>
@@ -103,7 +104,7 @@ export default function ConversationElementBubble({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 10 }}
-        className={cn(sharedStyle, "flex flex-row gap-x-2")}
+        className={cn(sharedStyle, "flex flex-row gap-x-2", className)}
       >
         <Avatar>
           <AvatarImage src={elementUser.image!} referrerPolicy="no-referrer" />
@@ -170,7 +171,8 @@ export default function ConversationElementBubble({
         exit={{ opacity: 0, y: 10 }}
         className={cn(
           sharedStyle,
-          "bg-slate-100 rounded-xl flex flex-row gap-x-4"
+          "bg-slate-100 rounded-xl flex flex-row gap-x-4",
+          className
         )}
       >
         <Avatar>
@@ -179,7 +181,7 @@ export default function ConversationElementBubble({
         </Avatar>
         <div className="flex flex-col gap-y-1">
           <FormattedDate date={conversationElement.updatedAt} />
-          <div className="text-xs  w-fit">
+          <div className="text-xs w-fit">
             {message}
             <Link
               className="font-semibold hover:underline cursor-pointer"
@@ -194,7 +196,7 @@ export default function ConversationElementBubble({
           {conversationElement.newStatus === "ACCEPTED" &&
             !actorIsCurrentUser && (
               <div className="flex flex-row gap-x-2 mt-2">
-                <Button className="w-full max-w-sm">Proceed to Payment</Button>
+                <PaymentButton {...conversationElement} />
               </div>
             )}
         </div>
