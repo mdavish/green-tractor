@@ -14,17 +14,20 @@ export default function PaymentButton(props: FetchedOfferUpdateWithType) {
       onClick={() => {
         startTransition(async () => {
           try {
-            console.log({ props });
-            const response = await createCheckoutSession(props);
+            const response = await createCheckoutSession({
+              offerUpdate: props,
+              successUrl: window.location.href,
+              cancelUrl: window.location.href,
+            });
             if (response.status === "error") {
               toast({
                 title: "Error",
                 description: response.message,
                 variant: "destructive",
               });
-            } else if (response.status === "sucecess") {
+            } else if (response.status === "success") {
               if (response.session?.url) {
-                router.push(response.session?.url);
+                router.push(response.session.url);
               } else {
                 toast({
                   title: "Error",

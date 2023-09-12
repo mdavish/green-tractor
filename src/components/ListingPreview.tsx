@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
-import { Listing, User, Offer } from "@prisma/client";
+import { Listing, User, Offer, ListingStatus } from "@prisma/client";
 import { haversineDistance } from "@/lib/utils";
 import { FaExclamationCircle } from "react-icons/fa";
 import { Button } from "./ui/button";
 import OfferButton from "./buttons/OfferButton";
+import Pill from "./Pill";
 
 interface ListingPreviewProps {
   listing: Listing & {
@@ -59,6 +60,13 @@ export default function ListingPreview({
             className="mx-auto md:mx-0"
             href={`/dashboard/listings/${listing.id}`}
           >
+            {listing.status !== "OPEN" && (
+              <Pill
+                className="mb-2"
+                text={listing.status}
+                color={listing.status === "SOLD" ? "green" : "red"}
+              />
+            )}
             <h1 className="hover:underline text-lg font-medium">
               {listing.title}
             </h1>

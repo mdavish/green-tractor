@@ -15,7 +15,11 @@ export default async function MyListingsPage() {
       listingUser: true,
       Offer: true,
     },
+    orderBy: {
+      listedDate: "desc",
+    },
   });
+
   return (
     <Page title="My Listings">
       <CreateListingButton currentUser={currentUser} />

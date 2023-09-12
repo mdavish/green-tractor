@@ -38,8 +38,11 @@ model Session {
 
 model User {
   id                String        @id @default(cuid())
+  // These are for selling things
   stripeAccountId   String?
   stripeAccountLink String?
+  // This one is for buying things
+  stripeCustomerId  String?
   name              String?
   profile           String?
   email             String?       @unique
@@ -72,18 +75,25 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+enum ListingStatus {
+  OPEN // The listing is open for offers
+  SOLD // The listing has been sold
+  ARCHIVED // The listing was deleted/cancelled by the seller
+}
+
 model Listing {
-  id                    String   @id @default(cuid())
+  id                    String        @id @default(cuid())
   title                 String
   listedDate            DateTime
   expirationDate        DateTime
   startingPrice         Float
-  startingPriceCurrency String?  @default("USD")
+  startingPriceCurrency String?       @default("USD")
   description           String
   imageUrl              String?
   listingUserId         String
-  listingUser           User     @relation(fields: [listingUserId], references: [id], onDelete: Cascade)
+  listingUser           User          @relation(fields: [listingUserId], references: [id], onDelete: Cascade)
   Offer                 Offer[]
+  status                ListingStatus @default(OPEN)
 }
 
 enum OfferStatus {

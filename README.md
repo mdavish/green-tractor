@@ -19,3 +19,27 @@ In essence, the "two way" channels (`thingsTo-UserA-from-UserB`) are for populat
 Then the "one way" channels (`thingsTo-UserC`) are for toast notifications, because those only need to happen whenever something happens for User C, regardless of whom its from.
 
 You can find some more information about this under `sendMessage.ts`.
+
+## Payments with Stripe
+We use Stripe for handling payments. Specifically we use [Stripe Connect](https://stripe.com/connect) which is their product for marketplaces like ours. [This guide](https://stripe.com/docs/connect/collect-then-transfer-guide?payment-ui=elements) basically explains the architecture we use.
+
+Here are the main points you should know:
+
+1. In order to sell stuff on Green Tractor , a user first has to set up a "Connected Account" with us. When they do this, they enter some information with Stripe, and Stripe handles all the tricky KYC stuff that we don't want to handle. You can find the logic for this in `setupStripe.ts`.
+2. If a user wants to buy something on Green Tractor, they don't need a connected account. When a user goes to buy something on Green Tractor, we simply use [Stripe Checkout](https://stripe.com/docs/payments/checkout). With Stripe Checkout, Stripe hosts and handles the checkout page. You can find the logic for this in `createCheckoutSession.ts`. Some day, we might use Stripe Elements to host our own checkout page, but for now Stripe Checkout is easiest. 
+3. Once a user has purchased something, we pay the seller out using the logic in `<INSERT FILE HERE>`. (This part isn't quite done yet.)
+
+### Local Development
+During local development with Stripe, you should use [the CLI](https://github.com/stripe/stripe-cli) to receive webhook events. You can find more information about this [here](https://stripe.com/docs/webhooks/quickstart).
+
+Run this command:
+```bash
+stripe listen --forward-to localhost:3000/api/payments/stripe-webhook
+```
+
+This will point Stripe events to the API route at `app/api/payments/stripe-webhook/route.ts`. This endpoint is in charge of handling Stripe events, such as when a payment succeeds. 
+
+You can also simulate fake events by using commands like...
+```bash
+stripe trigger payment_intent.succeeded
+```

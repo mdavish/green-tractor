@@ -12,6 +12,8 @@ interface Conversation {
     name: string | null;
     image: string | null;
   };
+  // TODO: Update this to look up latest offer, offerUpdate, OR message
+  // (I.e. this should be "latestConversationElement", not "latestOffer")
   latestOffer: {
     offerId: string;
     offerMessage: string;

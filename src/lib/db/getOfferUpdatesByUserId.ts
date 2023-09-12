@@ -15,6 +15,8 @@ export async function getOfferUpdatesByUserId(
   // Or the actor is the other user and the offer is from the current user
   const offerUpdates = await prisma.offerUpdate.findMany({
     where: {
+      // It's possible these four clauses could be made into two
+      // But right now I'm just not sure
       OR: [
         {
           AND: [
@@ -40,6 +42,36 @@ export async function getOfferUpdatesByUserId(
             },
           ],
         },
+        // We also want to show offer updates where the actor acts on their OWN offer for YOUR listing
+        // Which happens when someone pays their offer on your listing, after they've accepted it
+        {
+          AND: [
+            {
+              actorUserId: userId,
+            },
+            {
+              offer: {
+                listing: {
+                  listingUserId: resolvedCurrentUser.id,
+                },
+              },
+            },
+          ],
+        },
+        {
+          AND: [
+            {
+              actorUserId: resolvedCurrentUser.id,
+            },
+            {
+              offer: {
+                listing: {
+                  listingUserId: userId,
+                },
+              },
+            },
+          ],
+        },
       ],
     },
     include: {
@@ -56,6 +88,7 @@ export async function getOfferUpdatesByUserId(
       },
     },
   });
+
   return offerUpdates;
 }
 
