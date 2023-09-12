@@ -13,6 +13,13 @@ const SessionMetadata = z.object({
   lastOfferUpdateId: z.string(),
 });
 
+export function GET(request: Request) {
+  return NextResponse.json({
+    response:
+      "This is the Stripe webhook endpoint. You probably want to POST here.",
+  });
+}
+
 export async function POST(request: Request) {
   const headersList = headers();
   const signature = headersList.get("stripe-signature");
