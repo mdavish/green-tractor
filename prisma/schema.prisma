@@ -102,6 +102,7 @@ enum OfferStatus {
   COUNTERED // The seller has countered the offer
   ACCEPTED // The offer has been accepted, but payment has not yet been received
   PAID // The offer has been accepted and payment has been received
+  RECEIVED // The buyer has confirmed receipt
   CANCELLED // The offer was accepted, but the buyer cancelled the offer
 }
 

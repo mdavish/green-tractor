@@ -43,3 +43,14 @@ You can also simulate fake events by using commands like...
 ```bash
 stripe trigger payment_intent.succeeded
 ```
+
+## Inngest
+We use [Inngest](https://www.inngest.com/) for stuff that would otherwise require queues, background jobs, cron jobs, etc. For example, we use Inngest to...
+- Pay out sellers one week after a transaction closes, as long as the item wasn't returned/disputed
+- Send a reminder email to a user if they haven't responded to an offer within a day
+- Send users periodic weekly emails about listings they might be interested in
+
+To use Inngest in local development, run this:
+```bash
+npx inngest-cli@latest dev
+```
