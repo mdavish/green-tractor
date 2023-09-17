@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:stripe": "stripe listen --forward-to localhost:3000/api/payments/stripe-webhook",
+    "dev:inngest": "npx inngest-cli@latest dev",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint"

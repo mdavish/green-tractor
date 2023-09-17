@@ -1,24 +1,51 @@
 # Green Tractor
 This is the codebase for [Green Tractor](https://greentractor.us/). It is maintained by Max Davish. We have no official documentation system, so anything worth knowing is written down in this README.
 
+## Our Stack
+Here is a list of the main technologies we use:
+**Open Source**
+- [Prisma](https://www.prisma.io/) for ORM
+- [NextJS](https://nextjs.org/) for main application
+- [TailwindCSS](https://tailwindcss.com/) for CSS
+- [Shadcn](https://ui.shadcn.com/) for UI components
+**Paid**
+- [Vercel](https://vercel.com/) for hosting
+- [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres) (Neon) for database
+- [Pusher](https://pusher.com/) for realtime events
+- [Inngest](https://www.inngest.com/) for queues and background jobs
+- [Stripe](https://stripe.com/) for payments
+- [Resend](https://resend.com/) for email
+- [Segment](https://segment.com/) for analytics
+- [Mapbox](https://www.mapbox.com/) for geosearch, maps, etc.
+**Coming Soon**
+- [Algolia](https://www.algolia.com/) for search
+- [Open AI](https://openai.com/) for AI stuff
+- [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) + [Cloudflare](https://www.cloudflare.com/) for image hosting
+
+## Prisma and Side Effects
+For the most part we use Prisma pretty normally, but there are some cases where we want to always trigger side effects when a database record is created or updated. For example:
+- Send an update to Pusher every time a message, offer, or offer update is created
+- Queue up an email to be sent in Inngest every time an offer or offer update is created
+- Update the status of a listing to `PAID` every time an offer update with status `PAYMENT` happens
+
+All of this logic lives in the `PrismaSuperClient`, which exposes some new methods for creating certain objects. These methods work just like regular Prisma methods (same `data` argument) except that they trigger these side effects for you and also don't have an `include` argument, because they need to include certain other data themselves in order to trigger the right side effects. 
+
+Make sure to always use these methods in place of the raw Prisma methods, so use...
+- `prisma.createOfferUpdate` not `prisma.offerUpdate.create`
+- `prisma.createOffer` not `prisma.offer.create`
+- `prisma.createMessage` not `prisma.message.create`
+
 ## Realtime Messages + Notifications with Pusher
 We use [Pusher](http://pusher.com/) to listen to various events like new messages, new offers, etc.
 
-There are a few Pusher channels you need to know about:
+There are TWO pusher channels that we care about:
 
-1. `messagesFrom-<USER_ID>-to-<OTHER_USER_ID>`: This is the channel you subscribe to when you specifically want to know about any new messages that are sent from a specific user to another specific user. You need to do this when you are on a specific **conversation page** (i.e. `/dashboard/inbox/<OTHER_USER_ID>`).
-2. `messagesTo-<USER_ID>`: This is the channel you subscribe to when you want to listen to _all_ messages sent to a specific user (usually the logged in user). This channel is how we show toasts when a user receives a new message and stuff like that.
-3. `offersFrom-<USER_ID>-to-<OTHER_USER_ID>`: Same thing as #1 except for offers, not messages.
-4. `offersTo-<USER_ID>`: Same thing as #2 except for offers, not messages.
-5. `isTyping-<USER_ID>`: Indicates whether a specific user is typing. Actually, I'm realizing that I messed this up and this should be `isTyping-<USER_ID>-to-<OTHER_USER_ID>`, because right now it'll just show if that user is typing to _anyone_. So that's a mistake. Gotta fix that.
-6. `offerUpdatesFrom-<USER>-to-<OTHER_USER_ID>`: Same thing as #2 except for offer updates
-7. `offerUpdatesTo-<USER>`
+1. **One Way Channel**: (`to-${userId}`) This channel is how users get notifications from any of the conversations they're having with any other users. The logic for these notifications lives in the `<NotificationsProvider/>` component, which shows a toast when new messages arrive in the one way channel. Because the `NotificationsProvider` wraps the entire app, the one way channel is basically always subscribed to.
+2. **Two Way Channel:** (`from-${fromUserId}-to-${toUserId}`) This channel is for listening a _specific_ conversation beteen two users. We listen to this channel only when the user is on the `/dashboard/conversations/{otherUserId}` page. The logic lives in the `<ConversationPanel/>` component. In that component, we subscribe two _two_ two-way channels - the "outgoing" and the "incoming" channel. That way, the UI updates every time that either user sends a message, or makes an offer, or updates an offer. Unlike the one way channel, we only subscribe to the two way channel when the user is on the conversation page. 
 
-In essence, the "two way" channels (`thingsTo-UserA-from-UserB`) are for populating the convesation page, because that page needs to update every time a new conversation element from _either_ user shows up.
+In the `pusher.ts` file, we create superclasses for `PusherClient` and `PusherServer` that add extra methods with added type safety to ensure that we are sending the right data on the server and reading the right data on the client.
 
-Then the "one way" channels (`thingsTo-UserC`) are for toast notifications, because those only need to happen whenever something happens for User C, regardless of whom its from.
-
-You can find some more information about this under `sendMessage.ts`.
+From the `pusherServer`, you should always use `typedTrigger` to trigger events, and from `pusherServer` you should use `subscribeAndBind` and `unsubscribeAndBind`. These methods will give you nice type safety!
 
 ## Payments with Stripe
 We use Stripe for handling payments. Specifically we use [Stripe Connect](https://stripe.com/connect) which is their product for marketplaces like ours. [This guide](https://stripe.com/docs/connect/collect-then-transfer-guide?payment-ui=elements) basically explains the architecture we use.

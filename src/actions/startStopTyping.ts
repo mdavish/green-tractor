@@ -4,15 +4,17 @@ import { getCurrentUser } from "@/lib/auth";
 
 export default async function startStopTyping({
   isTyping,
+  otherUserId,
 }: {
   isTyping: boolean;
+  otherUserId: string;
 }) {
   const currentUser = await getCurrentUser();
   if (!currentUser) return;
-  // TODO: Make this a channel that is unique to the conversation
-  // (Right now, it's a channel that is unique to the user)
-  const channelName = `isTyping-${currentUser.id}`;
-  await pusherServer.trigger(channelName, "typing", {
-    isTyping,
+  const channel = pusherServer.getTwoWayChannel(currentUser.id, otherUserId);
+  await pusherServer.typedTrigger({
+    channel,
+    type: "isTyping",
+    data: isTyping,
   });
 }

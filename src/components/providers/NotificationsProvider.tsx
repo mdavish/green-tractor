@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect, createContext, useContext } from "react";
 import type { User } from "@prisma/client";
-import type { SendMessageResponse } from "@/actions/sendMessage";
 import { type NotificationDetails } from "@/lib/db/getNotifications";
 import { pusherClient } from "@/lib/pusher";
 import { useToast } from "../ui/use-toast";
 import Link from "next/link";
 import { ToastAction } from "../ui/toast";
+import { usePathname } from "next/navigation";
 
 interface NotificationsContextType {
   notifications: NotificationDetails;
@@ -38,6 +38,7 @@ export default function NotificationsProvider({
   children: React.ReactNode;
 }) {
   const { toast } = useToast();
+  const pathname = usePathname();
   const [notifications, setNotifications] =
     useState<NotificationDetails>(initialNotifications);
 
@@ -71,75 +72,73 @@ export default function NotificationsProvider({
 
   // Subscribe to the pusher channel for new messages
   useEffect(() => {
-    const incomingChanel = `messagesTo-${currentUser.id}`;
-    const channel = pusherClient.subscribe(incomingChanel);
-    channel.bind("newMessage", (data: SendMessageResponse) => {
-      toast({
-        title: `New message from ${data.fromUser.name}`,
-        description: data.message,
-        duration: 5000,
-        action: (
-          <ToastAction altText="View Conversation">
-            <Link href={`/dashboard/inbox/${data.fromUser.id}`}>View</Link>
-          </ToastAction>
-        ),
-      });
-      addUnreadMessage(data.fromUserId);
-    });
-    return () => {
-      pusherClient.unsubscribe(incomingChanel);
-      pusherClient.unbind("newMessage");
-    };
-  }, []);
+    const incomingChannel = pusherClient.getOneWayChannel(currentUser.id);
 
-  // Subscribe to the pusher channel for new offers
-  useEffect(() => {
-    const incomingChanel = `offersTo-${currentUser.id}`;
-    const channel = pusherClient.subscribe(incomingChanel);
-    channel.bind("newOffer", (data: SendMessageResponse) => {
+    pusherClient.subscribeAndBind(incomingChannel, "message", (message) => {
+      // Don't send the message toast if you're alrady on that conversation page
+      if (pathname === `/dashboard/inbox/${message.fromUser.id}`) {
+        return;
+      }
       toast({
-        title: `New offer from ${data.fromUser.name}`,
-        description: data.message,
+        title: `New message from ${message.fromUser.name}`,
+        description: message.message,
         duration: 5000,
         action: (
           <ToastAction altText="View Conversation">
-            <Link href={`/dashboard/inbox/${data.fromUser.id}`}>View</Link>
+            <Link href={`/dashboard/inbox/${message.fromUser.id}`}>View</Link>
           </ToastAction>
         ),
       });
-      addUnreadOffer(data.fromUserId);
+      addUnreadMessage(message.fromUserId);
     });
-    return () => {
-      pusherClient.unsubscribe(incomingChanel);
-      pusherClient.unbind("newOffer");
-    };
-  }, []);
 
-  // Subscribe to the pusher channel for offer updates
-  useEffect(() => {
-    const incomingChanel = `offerUpdatesTo-${currentUser.id}`;
-    const channel = pusherClient.subscribe(incomingChanel);
-    channel.bind("offerUpdate", (data: SendMessageResponse) => {
+    pusherClient.subscribeAndBind(incomingChannel, "offer", (offer) => {
       toast({
-        // TODO: Have a more specific title for this type of notification
-        // (Could copy some of the text from the message we construct in ConversationPanel)
-        title: `Offer update from ${data.fromUser.name}`,
-        description: data.message,
+        title: `New offer from ${offer.offerUser.name}`,
+        description: offer.offerMessage,
         duration: 5000,
         action: (
           <ToastAction altText="View Conversation">
-            <Link href={`/dashboard/inbox/${data.fromUser.id}`}>View</Link>
+            <Link href={`/dashboard/inbox/${offer.offerUser.id}`}>View</Link>
           </ToastAction>
         ),
       });
-      // TODO: This should be a different type of notification
-      // addUnreadOffer(data.fromUserId);
+      addUnreadOffer(offer.offerUserId);
     });
+
+    pusherClient.subscribeAndBind(
+      incomingChannel,
+      "offerUpdate",
+      (offerUpdate) => {
+        toast({
+          // TODO: Have a more specific title for this type of notification
+          // (Could copy some of the text from the message we construct in ConversationPanel)
+          title: `Offer update from ${offerUpdate.actorUser.name}`,
+          description: offerUpdate.message,
+          duration: 5000,
+          action: (
+            <ToastAction altText="View Conversation">
+              <Link href={`/dashboard/inbox/${offerUpdate.actorUser.id}`}>
+                View
+              </Link>
+            </ToastAction>
+          ),
+        });
+        // TODO: This should be a different type of notification
+        // addUnreadOffer(data.fromUserId);
+      }
+    );
+
     return () => {
-      pusherClient.unsubscribe(incomingChanel);
-      pusherClient.unbind("offerUpdate");
+      pusherClient.unsubscribe(incomingChannel);
+      pusherClient.typedUnbind("message");
+      pusherClient.typedUnbind("offer");
+      pusherClient.typedUnbind("offerUpdate");
+
+      // This is okay because this component should always be mounted
+      pusherClient.unbind_global();
     };
-  }, []);
+  }, [currentUser.id, toast, pathname]);
 
   return (
     <NotificationsContext.Provider

@@ -122,17 +122,19 @@ model Offer {
 }
 
 model OfferUpdate {
-  id          String      @id @default(cuid())
-  offerId     String
-  offer       Offer       @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  id                   String      @id @default(cuid())
+  offerId              String
+  offer                Offer       @relation(fields: [offerId], references: [id], onDelete: Cascade)
   // The user who made the update (this could be either the buyer or the seller)
-  actorUserId String
-  actorUser   User        @relation(fields: [actorUserId], references: [id], onDelete: Cascade)
-  seen        Boolean?    @default(false)
-  updatedAt   DateTime    @default(now())
-  newStatus   OfferStatus
-  newPrice    Float?
-  message     String?
+  actorUserId          String
+  actorUser            User        @relation(fields: [actorUserId], references: [id], onDelete: Cascade)
+  seen                 Boolean?    @default(false)
+  updatedAt            DateTime    @default(now())
+  newStatus            OfferStatus
+  newPrice             Float?
+  message              String?
+  stripeSessionId      String?
+  stripeSessionDetails Json?
 }
 
 model Message {

@@ -4,7 +4,6 @@ import { headers } from "next/headers";
 import type { Stripe } from "stripe";
 import z from "zod";
 import { prisma } from "@/lib/prisma";
-import { pusherServer } from "@/lib/pusher";
 
 const SessionMetadata = z.object({
   payingUserId: z.string(),
@@ -149,43 +148,22 @@ export async function POST(request: Request) {
         // 4. We send a pusher notification to the other user
         // (Some day we should probably make these all happen in one transaction.)
         // (Lots of data duplication here, but it's okay for now.)
-        const newOfferUpdate = await prisma.offerUpdate.create({
+        const newOfferUpdate = await prisma.createOfferUpdate({
           data: {
             offerId,
             newStatus: "PAID",
             newPrice: (session.amount_total ?? 0) / 100,
             actorUserId: payingUserId,
+            stripeSessionId: session.id,
+            stripeSessionDetails: JSON.stringify(session),
           },
         });
 
-        const updatedOffer = await prisma.offer.update({
-          where: {
-            id: offerId,
-          },
-          data: {
-            status: "PAID",
-          },
-        });
-
-        const updatedListing = await prisma.listing.update({
-          where: {
-            id: listingId,
-          },
-          data: {
-            status: "SOLD",
-          },
-        });
-
-        // TODO: Add pusher trigger
-
-        console.log("Successfully updated offer, listing, and offer update.");
-        console.log({ newOfferUpdate, updatedOffer, updatedListing });
+        console.log("Successfully updated offer.");
         return NextResponse.json({
-          response: "Successfully updated offer, listing, and offer update.",
+          response: "Successfully updated offer.",
           data: {
             newOfferUpdate,
-            updatedOffer,
-            updatedListing,
           },
         });
       }

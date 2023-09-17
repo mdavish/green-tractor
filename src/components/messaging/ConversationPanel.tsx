@@ -2,9 +2,6 @@
 import { useState, useEffect, useRef, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import type { Conversation } from "@/lib/db/getConversationByUserId";
-import type { Message } from "@prisma/client";
-import type { ExpandedOffer } from "@/actions/createOffer";
-import type { ExpandedOfferUpdate } from "@/actions/updateOffer";
 import ConversationElementBubble from "./ConversationElementBubble";
 import sendMessage from "@/actions/sendMessage";
 import startStopTyping from "@/actions/startStopTyping";
@@ -27,6 +24,7 @@ export default function ConversationPanel({
   const [otherUserIsTyping, setOtherUserIsTyping] = useState(false);
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [lastKeyStroke, setLastKeyStroke] = useState<number>(0);
   const [conversationElements, setConversationElements] =
     useState<Conversation>(conversation);
   const bottomDivRef = useRef<HTMLDivElement>(null);
@@ -36,7 +34,7 @@ export default function ConversationPanel({
     startTransition(async () => {
       await markConversationSeen(otherUser.id);
     });
-  }, []);
+  }, [otherUser.id]);
 
   // On the initial page load, the bottom div should be scrolled immediately into view
   // There should be no animation
@@ -52,167 +50,134 @@ export default function ConversationPanel({
     if (bottomDivRef.current) {
       bottomDivRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [conversationElements]);
+  }, [conversationElements, otherUserIsTyping]);
 
+  // Listen to all pusher events
+  // Remember, we do this for BOTH directions!
+  // (Except for the typing channel.)
   useEffect(() => {
-    const channel = `isTyping-${otherUser.id}`;
-    const channelObject = pusherClient.subscribe(channel);
-    channelObject.bind("typing", (data: { isTyping: boolean }) => {
-      setOtherUserIsTyping(data.isTyping);
+    const incomingChannel = pusherClient.getTwoWayChannel(
+      otherUser.id,
+      currentUser.id
+    );
+    const outgoingChannel = pusherClient.getTwoWayChannel(
+      currentUser.id,
+      otherUser.id
+    );
+
+    pusherClient.subscribeAndBind(incomingChannel, "isTyping", (isTyping) => {
+      setOtherUserIsTyping(isTyping);
     });
-    return () => {
-      pusherClient.unsubscribe(channel);
-      pusherClient.unbind("typing");
-    };
-  }, []);
 
-  // Set up pusher channels for incoming and outgoing messages
-  useEffect(() => {
-    const incomingChannel = `messagesFrom-${otherUser.id}-to-${currentUser.id}`;
-    const outgoingChannel = `messagesFrom-${currentUser.id}-to-${otherUser.id}`;
-    const incomingChannelObject = pusherClient.subscribe(incomingChannel);
-    const outgoingChannelObject = pusherClient.subscribe(outgoingChannel);
-    incomingChannelObject.bind("newMessage", (data: Message) => {
+    pusherClient.subscribeAndBind(incomingChannel, "message", (message) => {
       setConversationElements((conversationElements) => [
         ...conversationElements,
         {
           type: "message",
-          fromUser: otherUser,
-          fromUserId: data.fromUserId,
-          id: data.id,
-          message: data.message,
-          sentAt: new Date(data.sentAt),
-          toUserId: data.toUserId,
-          toUser: currentUser,
-          seen: data.seen,
+          ...message,
         },
       ]);
     });
-    outgoingChannelObject.bind("newMessage", (data: Message) => {
+    pusherClient.subscribeAndBind(outgoingChannel, "message", (message) => {
       setConversationElements((conversationElements) => [
         ...conversationElements,
         {
           type: "message",
-          fromUser: currentUser,
-          fromUserId: data.fromUserId,
-          id: data.id,
-          message: data.message,
-          sentAt: data.sentAt,
-          toUserId: data.toUserId,
-          toUser: otherUser,
-          seen: data.seen,
+          ...message,
         },
       ]);
     });
-    return () => {
-      pusherClient.unsubscribe(incomingChannel);
-      pusherClient.unsubscribe(outgoingChannel);
-      pusherClient.unbind("newMessage");
-    };
-  }, []);
 
-  // Set up pusher channels for incoming and outgoing offers
-  useEffect(() => {
-    const incomingChannel = `offersFrom-${otherUser.id}-to-${currentUser.id}`;
-    const outgoingChannel = `offersFrom-${currentUser.id}-to-${otherUser.id}`;
-    const incomingChannelObject = pusherClient.subscribe(incomingChannel);
-    const outgoingChannelObject = pusherClient.subscribe(outgoingChannel);
-    incomingChannelObject.bind("newOffer", (data: ExpandedOffer) => {
+    pusherClient.subscribeAndBind(incomingChannel, "offer", (offer) => {
       setConversationElements((conversationElements) => [
         ...conversationElements,
         {
-          ...data,
           type: "offer",
+          ...offer,
         },
       ]);
     });
-    outgoingChannelObject.bind("newOffer", (data: ExpandedOffer) => {
+    pusherClient.subscribeAndBind(outgoingChannel, "offer", (offer) => {
       setConversationElements((conversationElements) => [
         ...conversationElements,
         {
-          ...data,
           type: "offer",
+          ...offer,
         },
       ]);
     });
-    return () => {
-      pusherClient.unsubscribe(incomingChannel);
-      pusherClient.unsubscribe(outgoingChannel);
-      pusherClient.unbind("newOffer");
-    };
-  }, []);
 
-  // Set up pusher channels for incoming and outgoing offer updates
-  useEffect(() => {
-    const incomingChannel = `offerUpdatesFrom-${otherUser.id}-to-${currentUser.id}`;
-    const outgoingChannel = `offerUpdatesFrom-${currentUser.id}-to-${otherUser.id}`;
-    const incomingChannelObject = pusherClient.subscribe(incomingChannel);
-    const outgoingChannelObject = pusherClient.subscribe(outgoingChannel);
-    incomingChannelObject.bind(
-      "newOfferUpdate",
-      (data: ExpandedOfferUpdate) => {
-        {
-          setConversationElements((conversationElements) => [
-            ...conversationElements,
-            {
-              ...data,
-              type: "offerUpdate",
-            },
-          ]);
-        }
+    pusherClient.subscribeAndBind(
+      incomingChannel,
+      "offerUpdate",
+      (offerUpdate) => {
+        setConversationElements((conversationElements) => [
+          ...conversationElements,
+          {
+            type: "offerUpdate",
+            ...offerUpdate,
+          },
+        ]);
       }
     );
-    outgoingChannelObject.bind(
-      "newOfferUpdate",
-      (data: ExpandedOfferUpdate) => {
-        {
-          setConversationElements((conversationElements) => [
-            ...conversationElements,
-            {
-              ...data,
-              type: "offerUpdate",
-            },
-          ]);
-        }
+    pusherClient.subscribeAndBind(
+      outgoingChannel,
+      "offerUpdate",
+      (offerUpdate) => {
+        setConversationElements((conversationElements) => [
+          ...conversationElements,
+          {
+            type: "offerUpdate",
+            ...offerUpdate,
+          },
+        ]);
       }
     );
+
     return () => {
       pusherClient.unsubscribe(incomingChannel);
       pusherClient.unsubscribe(outgoingChannel);
-      pusherClient.unbind("newOfferUpdate");
+
+      pusherClient.typedUnbind("offerUpdate");
+      pusherClient.typedUnbind("offer");
+      pusherClient.typedUnbind("message");
+      pusherClient.typedUnbind("isTyping");
     };
-  }, []);
+  }, [otherUser, currentUser]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    setIsTyping(true);
+    if (event.key !== "Backspace" && event.key !== "Enter") {
+      setIsTyping(true);
+      setLastKeyStroke(Date.now());
+    }
     if (event.key === "Enter") {
       startTransition(async () => {
         await sendMessage({ toUserId: otherUser.id, message });
       });
       setMessage("");
+      setIsTyping(false);
     }
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsTyping(true);
     setMessage(event.target.value);
   };
 
   useEffect(() => {
     if (isTyping) {
-      startStopTyping({ isTyping: true });
+      startStopTyping({ isTyping: true, otherUserId: otherUser.id });
     } else {
-      startStopTyping({ isTyping: false });
+      startStopTyping({ isTyping: false, otherUserId: otherUser.id });
     }
-  }, [isTyping]);
+  }, [isTyping, otherUser.id]);
 
-  // Set not typing after 5 seconds
+  // Always set isTyping to false 3 seconds after the last keystroke
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsTyping(false);
-    }, 5000);
+    }, 3000);
     return () => clearTimeout(timeout);
-  }, [isTyping]);
+  }, [isTyping, lastKeyStroke]);
 
   return (
     <div className="w-full flex flex-col justify-end h-full">
@@ -240,7 +205,7 @@ export default function ConversationPanel({
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
+              exit={{ opacity: 0, y: -10 }}
               className="flex flex-row justify-start gap-x-2 px-10 text-sm"
             >
               <div className="my-auto w-2 h-2 bg-slate-500 rounded-full animate-bounce" />

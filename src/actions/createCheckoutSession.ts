@@ -134,9 +134,6 @@ export default async function createCheckoutSession({
     listingId: offerUpdate.offer.listing.id,
   };
 
-  console.log("Here is the metadata Im passing to start");
-  console.log(metadata);
-
   const session = await stripeClient.checkout.sessions.create({
     mode: "payment",
     customer_email: user.email,

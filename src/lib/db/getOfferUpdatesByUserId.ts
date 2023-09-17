@@ -78,12 +78,12 @@ export async function getOfferUpdatesByUserId(
       actorUser: true,
       offer: {
         include: {
+          offerUser: true,
           listing: {
             include: {
               listingUser: true,
             },
           },
-          offerUser: true,
         },
       },
     },

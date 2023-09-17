@@ -29,7 +29,6 @@ export default function CreateListingButton({
   const router = useRouter();
 
   const handleStripeSetup = () => {
-    console.log("Setting up stripe...");
     startTransition(async () => {
       const url = await setupStripe();
       router.push(url);
@@ -43,9 +42,6 @@ export default function CreateListingButton({
       </Link>
     );
   } else {
-    console.log(
-      "The user does not have a stripe account so Ill show the fake button"
-    );
     return (
       <>
         <AlertDialog
