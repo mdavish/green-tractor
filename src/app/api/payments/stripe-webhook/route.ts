@@ -183,4 +183,9 @@ export async function POST(request: Request) {
         response: `Unhandled event type ${event.type}. This is okay - not all events are handled.`,
       });
   }
+
+  return NextResponse.json({
+    response:
+      "This is the Stripe webhook endpoint. We should never get to this point in the code.",
+  });
 }

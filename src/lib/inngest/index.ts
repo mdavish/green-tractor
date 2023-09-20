@@ -4,6 +4,8 @@ import { EventSchemas, Inngest } from "inngest";
 import type { InngestFunction } from "inngest/components/InngestFunction";
 import type { Listing } from "@prisma/client";
 import type { ExpandedOfferUpdate, ExpandedOffer } from "@/lib/prisma";
+import OfferEmail from "@/components/email/OfferEmail";
+import OfferUpdateEmail from "@/components/email/OfferUpdateEmail";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -27,21 +29,12 @@ type InngestEvents = {
   };
 };
 
-export const inngest = new Inngest({
+export const inngestClient = new Inngest({
   name: "Green Tractor",
   schemas: new EventSchemas().fromRecord<InngestEvents>(),
 });
 
-export const helloWorld = inngest.createFunction(
-  { name: "Hello World" },
-  { event: "test/hello.world" },
-  async ({ event, step }) => {
-    await step.sleep("1s");
-    return { event, body: "Hello, World!" };
-  }
-);
-
-export const newOffer = inngest.createFunction(
+export const newOffer = inngestClient.createFunction(
   {
     name: "New Offer",
   },
@@ -49,8 +42,6 @@ export const newOffer = inngest.createFunction(
     event: "offer.new",
   },
   async ({ event, step }) => {
-    console.log("This is where I handle the new offer");
-    console.log({ event, step });
     const { listing } = event.data;
     const { email, name } = listing.listingUser;
 
@@ -66,9 +57,8 @@ export const newOffer = inngest.createFunction(
       const emailResponse = await resend.emails.send({
         from: "max@greentractor.us",
         to: email,
-        subject: `New Offer on ${listing}`,
-        // TODO: Make this actually good?
-        text: `Congratulations, ${name}! You received an offer on your listing.`,
+        subject: `New Offer on ${listing.title}`,
+        react: OfferEmail({ offer: event.data }),
       });
       return emailResponse;
     });
@@ -77,7 +67,32 @@ export const newOffer = inngest.createFunction(
   }
 );
 
-export const identifyUnreadUsers = inngest.createFunction(
+export const offerUpdate = inngestClient.createFunction(
+  {
+    name: "Offer Update",
+  },
+  {
+    event: "offer.update",
+  },
+  async ({ event, step }) => {
+    const recipientUser = ["ACCEPTED", "REJECTED", "COUNTERED"].includes(
+      event.data.newStatus
+    )
+      ? event.data.offer.offerUser
+      : event.data.offer.listing.listingUser;
+
+    await step.run("Send Offer Update Email", async () => {
+      const emailResponse = await resend.emails.send({
+        from: "max@greentractor.us",
+        to: recipientUser.email!,
+        subject: `Offer Update on ${event.data.offer.listing.title}`,
+        react: OfferUpdateEmail({ offerUpdate: event.data, recipientUser }),
+      });
+    });
+  }
+);
+
+export const identifyUnreadUsers = inngestClient.createFunction(
   {
     name: "Identify Users with Unreads",
   },
@@ -115,7 +130,7 @@ export const identifyUnreadUsers = inngest.createFunction(
   }
 );
 
-export const unreadMessages = inngest.createFunction(
+export const unreadMessages = inngestClient.createFunction(
   {
     name: "Notify User About Unread Messages",
   },
@@ -124,12 +139,13 @@ export const unreadMessages = inngest.createFunction(
   },
   async ({ event, step }) => {
     console.log(`User ${event.data.userId} has some unread messages ooh wee`);
+    // TODO: Implement this
   }
 );
 
 export const allFunctions: InngestFunction<any, any, any>[] = [
-  helloWorld,
   newOffer,
+  offerUpdate,
   identifyUnreadUsers,
   unreadMessages,
 ];

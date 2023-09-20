@@ -8,6 +8,7 @@ import type {
   Listing,
 } from "@prisma/client";
 import { pusherServer } from "./pusher";
+import { inngestClient } from "@/lib/inngest";
 
 export type ExpandedOfferUpdate = OfferUpdate & {
   actorUser: User;
@@ -151,6 +152,11 @@ class PrismaSuperClient extends PrismaClient {
       data: offerUpdate,
     });
 
+    inngestClient.send({
+      name: "offer.update",
+      data: offerUpdate,
+    });
+
     return offerUpdate;
   }
 
@@ -194,6 +200,11 @@ class PrismaSuperClient extends PrismaClient {
     this.pusher.typedTrigger({
       channel: twoWayChannel,
       type: "offer",
+      data: offer,
+    });
+
+    inngestClient.send({
+      name: "offer.new",
       data: offer,
     });
 

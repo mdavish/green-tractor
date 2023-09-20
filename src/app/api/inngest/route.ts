@@ -1,5 +1,5 @@
 import { serve } from "inngest/next";
-import { inngest, allFunctions } from "@/lib/inngest";
+import { inngestClient, allFunctions } from "@/lib/inngest";
 
 // Create an API that serves zero functions
-export const { GET, POST, PUT } = serve(inngest, allFunctions);
+export const { GET, POST, PUT } = serve(inngestClient, allFunctions);
