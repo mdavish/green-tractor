@@ -1,16 +1,25 @@
 import type { User, OfferStatus } from "@prisma/client";
 import type { ExpandedOfferUpdate } from "@/lib/prisma";
-import { EmailTemplate } from "./EmailTemplate";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import FormattedDate from "@/components/FormattedDate";
+import EmailTemplate from "./EmailTemplate";
+import {
+  Img,
+  Column,
+  Row,
+  Text,
+  Section,
+  Container,
+} from "@react-email/components";
+import { sampleOfferUpdate, sampleUser } from "./sampleData";
+import FormattedDate from "./EmailDate";
+import Button from "./EmailButton";
 
+// TODO: Make it possible to debug this in React Email dev tools
 export default function OfferUpdateEmail({
-  offerUpdate,
+  offerUpdate = sampleOfferUpdate,
   className,
-  recipientUser,
+  recipientUser = sampleUser,
 }: {
-  offerUpdate: ExpandedOfferUpdate;
+  offerUpdate?: ExpandedOfferUpdate;
   className?: string;
   recipientUser: User;
 }) {
@@ -84,29 +93,39 @@ export default function OfferUpdateEmail({
     <EmailTemplate
       className={className}
       headline={`Update about the Offer on ${offerUpdate.offer.listing.title}`}
-      subheader={<>{message}</>}
+      previewText={`Update about the Offer on ${offerUpdate.offer.listing.title}`}
+      subheader={message}
     >
-      <div className="flex flex-row gap-x-3 border border-slate-200 rounded-md p-4">
-        <Avatar>
-          <AvatarImage
+      <Container
+        align="center"
+        className="border border-solid border-slate-200 rounded-md p-3 my-3 w-fit mx-auto"
+      >
+        <Row className="">
+          <Img
             src={offerUpdate.actorUser.image!}
-            referrerPolicy="no-referrer"
+            width={40}
+            height={40}
+            className="rounded-full"
           />
-          <AvatarFallback />
-        </Avatar>
-        <div className="flex flex-col gap-y-1 text-sm">
-          <div className="font-medium text-slate-800">
-            {offerUpdate.actorUser.name}{" "}
-            <FormattedDate date={offerUpdate.updatedAt} />
-          </div>
-          <div>{offerUpdate.message}</div>
-        </div>
-      </div>
-      <Button asChild>
-        <a href={`/dashboard/inbox/${offerUpdate.actorUser.id}`}>
-          View Conversation
-        </a>
-      </Button>
+        </Row>
+        <Column className="flex flex-col text-sm p-3 gap-y-1">
+          <Text className="">
+            <span className="font-medium text-slate-800">
+              {offerUpdate.actorUser.name}{" "}
+              <FormattedDate date={offerUpdate.updatedAt} />
+            </span>
+            <br />
+            <span>{offerUpdate.message}</span>
+          </Text>
+        </Column>
+      </Container>
+      <Section className="text-center">
+        <Button
+          href={`https://greentractor.us/dashboard/inbox/${offerUpdate.actorUser.id}`}
+        >
+          View Offer
+        </Button>
+      </Section>
     </EmailTemplate>
   );
 }

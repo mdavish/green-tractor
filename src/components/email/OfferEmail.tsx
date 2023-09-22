@@ -1,11 +1,21 @@
+import EmailTemplate from "./EmailTemplate";
 import { ExpandedOffer } from "@/lib/prisma";
-import { EmailTemplate } from "./EmailTemplate";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import FormattedDate from "@/components/FormattedDate";
+import {
+  Img,
+  Column,
+  Row,
+  Text,
+  Section,
+  Container,
+} from "@react-email/components";
+import { sampleOffer, sampleUser } from "./sampleData";
+import FormattedDate from "./EmailDate";
+import Button from "./EmailButton";
 
-export default function OfferEmail({
-  offer,
+OfferEmail.PreviewProps = { offer: sampleOffer };
+
+function OfferEmail({
+  offer = sampleOffer,
   className,
 }: {
   offer: ExpandedOffer;
@@ -15,38 +25,42 @@ export default function OfferEmail({
     <EmailTemplate
       className={className}
       headline="You received a new offer on your listing!"
-      subheader={
-        <>
-          Congratulations! You received an offer for ${offer.offerPrice} on your
-          listing{" "}
-          <a
-            className="text-blue-600 hover:underline"
-            href={`/dashboard/listings/${offer.listingId}`}
-          >
-            {offer?.listing.title}
-          </a>
-          .
-        </>
-      }
+      previewText={`You received a new offer on your listing!`}
+      subheader={`Congratulations! You received an offer for $${offer.offerPrice.toLocaleString()} on your your [listing](https://www.greentractor.us/dashboard/listings/${
+        offer.listingId
+      }).`}
     >
-      <div className="flex flex-row gap-x-3 border border-slate-200 rounded-md p-4">
-        <Avatar>
-          <AvatarImage
+      <Container
+        align="center"
+        className="border border-solid border-slate-200 rounded-md p-3 my-3 w-fit mx-auto"
+      >
+        <Row className="">
+          <Img
             src={offer.offerUser.image!}
-            referrerPolicy="no-referrer"
+            width={40}
+            height={40}
+            className="rounded-full"
           />
-          <AvatarFallback />
-        </Avatar>
-        <div className="flex flex-col gap-y-1 text-sm">
-          <div className="font-medium text-slate-800">
-            {offer.offerUser.name} <FormattedDate date={offer.offerDate} />
-          </div>
-          <div>{offer.offerMessage}</div>
-        </div>
-      </div>
-      <Button asChild>
-        <a href={`/dashboard/inbox/${offer.offerUser.id}`}>View Offer</a>
-      </Button>
+        </Row>
+        <Column className="flex flex-col text-sm p-3 gap-y-1">
+          <Text className="">
+            <span className="font-medium text-slate-800">
+              {offer.offerUser.name} <FormattedDate date={offer.offerDate} />
+            </span>
+            <br />
+            <span>{offer.offerMessage}</span>
+          </Text>
+        </Column>
+      </Container>
+      <Section className="text-center">
+        <Button
+          href={`https://greentractor.us/dashboard/inbox/${offer.offerUser.id}`}
+        >
+          View Offer
+        </Button>
+      </Section>
     </EmailTemplate>
   );
 }
+
+export default OfferEmail;

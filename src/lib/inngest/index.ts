@@ -55,7 +55,7 @@ export const newOffer = inngestClient.createFunction(
     // await step.sleep("10 hour")
     await step.run("Send Offer Update Email", async () => {
       const emailResponse = await resend.emails.send({
-        from: "max@greentractor.us",
+        from: "Green Tractor <max@greentractor.us>",
         to: email,
         subject: `New Offer on ${listing.title}`,
         react: OfferEmail({ offer: event.data }),
@@ -83,7 +83,7 @@ export const offerUpdate = inngestClient.createFunction(
 
     await step.run("Send Offer Update Email", async () => {
       const emailResponse = await resend.emails.send({
-        from: "max@greentractor.us",
+        from: "Green Tractor <max@greentractor.us>",
         to: recipientUser.email!,
         subject: `Offer Update on ${event.data.offer.listing.title}`,
         react: OfferUpdateEmail({ offerUpdate: event.data, recipientUser }),

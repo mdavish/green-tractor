@@ -9,7 +9,7 @@ const patuaOne = Patua_One({
   subsets: ["latin"],
 });
 
-export default function Logo({ className }: { className?: string }) {
+export default function EmailLogo({ className }: { className?: string }) {
   return (
     <div className={cn("flex flex-row gap-x-3 p-1", className)}>
       <Image
