@@ -12,6 +12,7 @@ export default async function MyListingsPage() {
       listingUserId: currentUser.id,
     },
     include: {
+      mainImage: true,
       listingUser: true,
       Offer: true,
     },

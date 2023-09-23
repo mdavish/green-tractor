@@ -6,6 +6,7 @@ import ListingPreview from "@/components/ListingPreview";
 export default async function DashboardHomePage() {
   const allListings = await prisma.listing.findMany({
     include: {
+      mainImage: true,
       listingUser: true,
       Offer: true,
     },

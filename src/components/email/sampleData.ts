@@ -36,7 +36,7 @@ export const sampleOffer: ExpandedOffer = {
     title: "John Deere 1025R",
     description: "This is a great tractor!",
     expirationDate: new Date(),
-    imageUrl: "https://www.greentractor.us/logo.svg",
+    mainImageId: null,
     startingPrice: 10000,
     listedDate: new Date(),
     listingUser: sampleUser,

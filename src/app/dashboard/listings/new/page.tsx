@@ -13,7 +13,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { addListing } from "@/actions/addListing";
 import { format } from "date-fns";
 import { FaCalendarAlt as CalendarIcon } from "react-icons/fa";
-import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +24,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type ListingData, ListingSchema } from "../../../../schemas/Listing";
+import { uploadClientsideImage } from "@/lib/cloudinary";
 
 export default function NewListingPage() {
   const form = useForm<ListingData>({
@@ -39,6 +39,8 @@ export default function NewListingPage() {
   const [isPending, startTransition] = useTransition();
 
   function onSubmit(data: ListingData) {
+    console.log("This here is the data that is being submitted");
+    console.log({ data });
     startTransition(async () => {
       await addListing(data);
     });
@@ -48,6 +50,7 @@ export default function NewListingPage() {
     <Page title="New Listing">
       <Form {...form}>
         <form
+          encType="multipart/form-data"
           className="w-full max-w-2xl flex flex-col gap-y-4"
           onSubmit={form.handleSubmit(onSubmit)}
         >
@@ -167,24 +170,28 @@ export default function NewListingPage() {
               )}
             />
           </div>
+          {/* Images are first uploaded to Cloudinary */}
           <FormField
             control={form.control}
-            name="imageUrl"
+            name="imageDetails"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Image</FormLabel>
-                <FormControl>
-                  <Input
-                    type="file"
-                    // Only allow image files
-                    accept="image/*"
-                    placeholder="https://example.com/image.jpg"
-                    {...field}
-                  />
-                </FormControl>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) {
+                      uploadClientsideImage(file).then((response) => {
+                        form.setValue("imageDetails", response);
+                      });
+                    }
+                  }}
+                />
               </FormItem>
             )}
-          />
+          ></FormField>
           <Button type="submit" className="ml-auto w-fit ">
             {isPending ? "Creating..." : "Submit Listing"}
           </Button>
@@ -193,9 +200,3 @@ export default function NewListingPage() {
     </Page>
   );
 }
-
-const FormSchema = z.object({
-  dob: z.date({
-    required_error: "A date of birth is required.",
-  }),
-});

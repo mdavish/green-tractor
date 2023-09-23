@@ -82,18 +82,19 @@ enum ListingStatus {
 }
 
 model Listing {
-  id                    String        @id @default(cuid())
+  id                    String           @id @default(cuid())
   title                 String
   listedDate            DateTime
   expirationDate        DateTime
   startingPrice         Float
-  startingPriceCurrency String?       @default("USD")
+  startingPriceCurrency String?          @default("USD")
   description           String
-  imageUrl              String?
+  mainImageId           String?
+  mainImage             CloudinaryAsset? @relation(fields: [mainImageId], references: [asset_id])
   listingUserId         String
-  listingUser           User          @relation(fields: [listingUserId], references: [id], onDelete: Cascade)
+  listingUser           User             @relation(fields: [listingUserId], references: [id], onDelete: Cascade)
   Offer                 Offer[]
-  status                ListingStatus @default(OPEN)
+  status                ListingStatus    @default(OPEN)
 }
 
 enum OfferStatus {
@@ -146,4 +147,29 @@ model Message {
   toUser     User     @relation("MessageToUser", fields: [toUserId], references: [id], onDelete: Cascade)
   fromUser   User     @relation("MessageFromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
   seen       Boolean? @default(false)
+}
+
+model CloudinaryAsset {
+  asset_id          String    @id
+  public_id         String
+  version           BigInt
+  version_id        String
+  signature         String
+  width             Int
+  height            Int
+  format            String
+  resource_type     String
+  created_at        DateTime
+  tags              String[] // Assuming this is an array of strings
+  bytes             Int
+  type              String
+  etag              String
+  placeholder       Boolean
+  url               String
+  secure_url        String
+  folder            String
+  original_filename String
+  Listing           Listing[]
+
+  @@index([asset_id], name: "idx_cloudinary_asset_id")
 }

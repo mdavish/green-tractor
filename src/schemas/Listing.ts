@@ -1,4 +1,5 @@
 import z from "zod";
+import { CloudinaryUploadResponseSchema } from "@/lib/cloudinary";
 
 export const ListingSchema = z.object({
   title: z.string(),
@@ -6,7 +7,7 @@ export const ListingSchema = z.object({
   startingPrice: z.coerce.number().positive(),
   listedDate: z.date(),
   expirationDate: z.date(),
-  imageUrl: z.string().optional(),
+  imageDetails: CloudinaryUploadResponseSchema.optional(),
 });
 
 export type ListingData = z.infer<typeof ListingSchema>;

@@ -1,16 +1,17 @@
 "use server";
-import { ListingData, ListingSchema } from "@/schemas/Listing";
+import { ListingData } from "@/schemas/Listing";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import type { CloudinaryAsset } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 export async function addListing({
-  title,
   description,
+  expirationDate,
+  imageDetails,
   listedDate,
   startingPrice,
-  expirationDate,
-  imageUrl,
+  title,
 }: ListingData) {
   const currentUser = await getCurrentUser();
 
@@ -24,9 +25,14 @@ export async function addListing({
     );
   }
 
-  // What will this return?
-  console.log({ imageUrl });
+  let newAsset: CloudinaryAsset | undefined;
+  if (imageDetails) {
+    newAsset = await prisma.cloudinaryAsset.create({
+      data: imageDetails,
+    });
+  }
 
+  // Temporarily disabling this
   const newListing = await prisma.listing.create({
     include: {
       listingUser: true,
@@ -40,6 +46,7 @@ export async function addListing({
       listedDate,
       // TODO: Make this configuralbe
       startingPriceCurrency: "USD",
+      mainImageId: newAsset?.asset_id,
     },
   });
 

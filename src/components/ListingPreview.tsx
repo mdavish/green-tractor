@@ -1,15 +1,18 @@
 "use client";
 import Link from "next/link";
-import { Listing, User, Offer, ListingStatus } from "@prisma/client";
+import { Listing, User, Offer } from "@prisma/client";
 import { haversineDistance } from "@/lib/utils";
 import { FaExclamationCircle } from "react-icons/fa";
 import { Button } from "./ui/button";
 import OfferButton from "./buttons/OfferButton";
 import Pill from "./Pill";
+import type { CloudinaryAsset } from "@prisma/client";
+import ResponsiveImage from "./ResponsiveImage";
 
 interface ListingPreviewProps {
   listing: Listing & {
     listingUser: User;
+    mainImage: CloudinaryAsset | null;
   };
   currentUser: User;
   offers: Offer[];
@@ -49,11 +52,11 @@ export default function ListingPreview({
       key={listing.id}
       className="border border-slate-300 shadow-sm px-4 py-5 rounded-md w-full flex flex-col md:flex-row gap-x-3"
     >
-      <div className="mx-auto md:mx-0 w-56 h-64 shrink-0 bg-slate-200 rounded-lg shadow-sm flex">
-        <h1 className="mx-auto my-auto text-slate-900 text-2xl text-center">
-          Image <br /> Placeholder
-        </h1>
-      </div>
+      <ResponsiveImage
+        cloudinaryPublicId={listing.mainImage?.public_id}
+        alt={`Image of ${listing.title}}`}
+        fallbackText="No Image Available"
+      />
       <div className="my-auto p-4 flex-col gap-y-2 w-full shrink">
         <div className="flex flex-col gap-y-2">
           <Link
@@ -90,7 +93,7 @@ export default function ListingPreview({
               No Location Available
             </p>
           )}{" "}
-          <div className="hidden md:flex md:flex-row gap-x-4">
+          <div className="hidden lg:flex lg:flex-row gap-x-4">
             <p>Posted {new Date(listing.listedDate).toLocaleDateString()}</p>
             <p>
               Expires {new Date(listing.expirationDate).toLocaleDateString()}
@@ -105,7 +108,7 @@ export default function ListingPreview({
       </div>
       <div className="p-4 shrink-0 mx-auto md:ml-auto md:mr-4 my-auto flex flex-col">
         <h2 className="mx-auto md:ml-auto text-2xl font-medium md:text-center">
-          ${listing.startingPrice}
+          ${listing.startingPrice.toLocaleString()}
         </h2>
         <p className="mx-auto mt-2 text-xs md:text-gray-600 ml-auto md:flex flex-row mb-4">
           Starting Price

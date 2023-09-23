@@ -81,3 +81,28 @@ To use Inngest in local development, run this:
 ```bash
 npx inngest-cli@latest dev
 ```
+
+## Email with Resend and React Email
+We use [Resend](https://resend.com/) and [React Email](https://react.email/) to send emails to users.
+
+Under the `src/components/email` you'll find the actual email templates that we use to send emails. To develop these 
+templates locally, you can run `npm run dev:email` which will start the React Email dev server (which, frankly, is a little buggy). 
+
+Importantly, you _can't_ just use any old React component from this project in developing your emails. You have to use React Email's special components such as the [Tailwind](https://react.email/docs/components/tailwind) component or the [Image](https://react.email/docs/components/image) component. These components ensure that things appear roughly consistently across email clients. 
+
+This also unfortunately means that we have to recreate some of our utilities like the `cn` function and the `FormattedDate` function. Overall you should think of the email templates as a separate project from the rest of the codebase.
+
+The emails themselves are sent by Inngest - most of the code for that lives in `src/lib/inngest/index.ts`.
+
+## Cloudinary
+### Uploading Photos
+We use Cloudinary for uploading and serving photos. This is very tricky, and there are a few things you need to know to understand how this is handled.
+
+First, because we use NextJS server actions, you can't pass files directly to the actions. You can only pass plain objects. Additionally, because we use a [Zod Resolver](https://github.com/react-hook-form/resolvers) in react-hook-form, we can't pass a file to the resolver either. So, we have to upload the file to Cloudinary _before_ we send it to the server.
+
+So the recommended approach, according to this [Github Issue](https://github.com/orgs/react-hook-form/discussions/10091), is to generate the Cloudinary URL on the client, and then pass that URL to the server. The server can then use that URL to download the file from Cloudinary and save it to the database.
+
+We can do this using [client side uploading](https://cloudinary.com/documentation/upload_images#client_side_uploading) with cloudinary. More specifically, we use the [upload endpoint](https://cloudinary.com/documentation/react_image_and_video_upload#upload_endpoint) as opposed to their upload widget, because I think the widget is ugly.
+
+### Serving Photos
+We use next-cloudinary to serve the images. Responsize sizing is really tricky, but [this](https://next.cloudinary.dev/guides/responsive-images) is a great explainer on how to do it. 
