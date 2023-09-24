@@ -18,6 +18,7 @@ import { Button } from "./ui/button";
 import Logo from "./Logo";
 import { useNotifications } from "./providers/NotificationsProvider";
 import NotificationBadge from "./NotificationBadge";
+
 interface NavItem {
   name: string;
   href: string;

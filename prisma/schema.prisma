@@ -152,7 +152,7 @@ model Message {
 model CloudinaryAsset {
   asset_id          String    @id
   public_id         String
-  version           BigInt
+  version           Int
   version_id        String
   signature         String
   width             Int

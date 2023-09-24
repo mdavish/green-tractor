@@ -2,10 +2,10 @@
 import { cn } from "@/lib/utils";
 import { CldImage } from "next-cloudinary";
 
-export type ImageSize = "small" | "medium" | "large";
+export type ImageSize = "xs" | "small" | "medium" | "large";
 
 export interface ResponsiveImageProps {
-  cloudinaryPublicId?: string;
+  cloudinaryPublicId: string | undefined | null;
   className?: string;
   alt: string;
   size?: ImageSize;
@@ -31,6 +31,7 @@ export default function ResponsiveImage({
     ImageSize,
     { tailwindClass: string; height: number; width: number }
   > = {
+    xs: { tailwindClass: "h-[40px] w-[40px]", height: 40, width: 40 },
     small: { tailwindClass: "h-[300px] w-[300px]", height: 300, width: 300 },
     medium: { tailwindClass: "h-[500px] w-[500px]", height: 500, width: 500 },
     large: { tailwindClass: "h-[700px] w-[700px]", height: 700, width: 700 },

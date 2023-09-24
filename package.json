@@ -10,7 +10,8 @@
     "dev:inngest": "npx inngest-cli@latest dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "algolia": "ts-node -r tsconfig-paths/register ./src/lib/algolia.ts"
   },
   "dependencies": {
     "@cloudinary/react": "^1.11.2",
@@ -44,6 +45,7 @@
     "@types/node": "20.4.9",
     "@types/react": "18.2.19",
     "@types/react-dom": "18.2.7",
+    "algoliasearch": "^4.20.0",
     "autoprefixer": "10.4.14",
     "class-variance-authority": "^0.7.0",
     "cloudinary": "^1.40.0",
@@ -70,6 +72,7 @@
     "react-email": "^1.9.4",
     "react-hook-form": "^7.45.4",
     "react-icons": "^4.10.1",
+    "react-instantsearch": "^7.1.0",
     "resend": "^0.17.2",
     "sharp": "^0.32.5",
     "stripe": "^12.18.0",
@@ -80,6 +83,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "prisma": "^5.3.1"
+    "prisma": "^5.3.1",
+    "tsconfig-paths": "^4.2.0"
   }
 }
