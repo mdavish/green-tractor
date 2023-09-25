@@ -22,8 +22,8 @@ export default function Page({
   return (
     <div
       className={cn(
-        "flex flex-col p-6 md:p-10 w-full",
-        maxWidth && "max-w-4xl",
+        "flex flex-col p-6 md:px-10 md:py-6 w-full",
+        maxWidth ? "max-w-4xl" : "max-w-none",
         className
       )}
     >

@@ -46,5 +46,5 @@ export async function addListing({
     },
   });
 
-  return redirect(`/dashboard/listings/${newListing.id}`);
+  return redirect(`/listings/${newListing.id}`);
 }

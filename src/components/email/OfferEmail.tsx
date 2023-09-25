@@ -26,7 +26,7 @@ function OfferEmail({
       className={className}
       headline="You received a new offer on your listing!"
       previewText={`You received a new offer on your listing!`}
-      subheader={`Congratulations! You received an offer for $${offer.offerPrice.toLocaleString()} on your your [listing](https://www.greentractor.us/dashboard/listings/${
+      subheader={`Congratulations! You received an offer for $${offer.offerPrice.toLocaleString()} on your your [listing](https://www.greentractor.us/listings/${
         offer.listingId
       }).`}
     >

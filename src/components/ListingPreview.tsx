@@ -59,10 +59,7 @@ export default function ListingPreview({
       />
       <div className="my-auto p-4 flex-col gap-y-2 w-full shrink">
         <div className="flex flex-col gap-y-2">
-          <Link
-            className="mx-auto md:mx-0"
-            href={`/dashboard/listings/${listing.id}`}
-          >
+          <Link className="mx-auto md:mx-0" href={`/listings/${listing.id}`}>
             {listing.status !== "OPEN" && (
               <Pill
                 className="mb-2"

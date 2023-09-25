@@ -63,8 +63,8 @@ export default async function ListingDetail({ params: { listingId } }: Params) {
   const { latitude, longitude } = listing.listingUser;
 
   return (
-    <Page title={listing.title}>
-      <div className="flex flex-col md:flex-row md:gap-x-10 max-w-3xl">
+    <Page title={listing.title} maxWidth={false}>
+      <div className="flex flex-col md:flex-row md:gap-x-10 max-w-5xl">
         <ResponsiveImage
           cloudinaryPublicId={listing.mainImage?.public_id}
           alt={`Image of ${listing.title}}`}
@@ -92,24 +92,27 @@ export default async function ListingDetail({ params: { listingId } }: Params) {
             <FarmerPreview {...listing.listingUser} />
             {latitude && longitude && (
               <StaticMap
+                className="mx-auto"
                 lat={latitude}
                 lng={longitude}
                 width={400}
                 height={200}
               />
             )}
-            {isOwner && <Button variant="destructive">Delete Listing</Button>}
-            {!isOwner && !currentUserHasOffered && (
-              <OfferButton currentUser={currentUser!} listing={listing} />
-            )}
-            {!isOwner && currentUserHasOffered && (
-              <Link
-                className="w-full"
-                href={`/dashboard/inbox/${listing.listingUserId}`}
-              >
-                <Button className="w-full">View My Offer</Button>
-              </Link>
-            )}
+            <div className="max-w-3xl mx-auto">
+              {isOwner && <Button variant="destructive">Delete Listing</Button>}
+              {!isOwner && !currentUserHasOffered && (
+                <OfferButton currentUser={currentUser!} listing={listing} />
+              )}
+              {!isOwner && currentUserHasOffered && (
+                <Link
+                  className="w-full"
+                  href={`/dashboard/inbox/${listing.listingUserId}`}
+                >
+                  <Button className="w-full">View My Offer</Button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>

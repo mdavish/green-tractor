@@ -76,7 +76,7 @@ export default function ConversationElementBubble({
             {isFromCurrentUser ? "your" : "their"} listing:{" "}
             <Link
               className="font-semibold hover:underline cursor-pointer"
-              href={`/dashboard/listings/${conversationElement.listing.id}`}
+              href={`/listings/${conversationElement.listing.id}`}
             >
               {conversationElement.listing.title}
             </Link>{" "}
@@ -185,7 +185,7 @@ export default function ConversationElementBubble({
             {message}
             <Link
               className="font-semibold hover:underline cursor-pointer"
-              href={`/dashboard/listings/${conversationElement.offer.listing.id}`}
+              href={`/listings/${conversationElement.offer.listing.id}`}
             >
               {conversationElement.offer.listing.title}
             </Link>{" "}
