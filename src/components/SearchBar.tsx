@@ -41,8 +41,8 @@ export default function SearchBar({ className }: { className?: string }) {
 
     if (e.key === "Enter") {
       e.preventDefault();
-      if (!selectedIndex) return;
-      if (!hits[selectedIndex]) return;
+      if (selectedIndex === undefined) return;
+      if (hits[selectedIndex] === undefined) return;
       router.push(`/dashboard/listings/${hits[selectedIndex]?.objectID}`);
     }
   };
@@ -66,8 +66,9 @@ export default function SearchBar({ className }: { className?: string }) {
                 key={hit.objectID}
                 href={`/dashboard/listings/${hit.objectID}`}
                 className={cn(
-                  "hover:bg-slate-50",
-                  index === selectedIndex && "bg-slate-50"
+                  index === selectedIndex
+                    ? "bg-slate-100"
+                    : "bg-white hover:bg-slate-50"
                 )}
               >
                 <li className="text-slate-900 p-3 z-50 flex flex-row gap-x-4 justify-normal">

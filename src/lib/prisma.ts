@@ -6,8 +6,10 @@ import type {
   OfferUpdate,
   User,
   Listing,
+  CloudinaryAsset,
 } from "@prisma/client";
 import { pusherServer } from "./pusher";
+import { listingsIndex } from "./algolia";
 import { inngestClient } from "@/lib/inngest";
 
 export type ExpandedOfferUpdate = OfferUpdate & {
@@ -32,6 +34,11 @@ export type ExpandedMessage = Message & {
   toUser: User;
 };
 
+export type ExpandedListing = Listing & {
+  listingUser: User;
+  mainImage: CloudinaryAsset | null | undefined;
+};
+
 /**
  * The PrismaSuperClient exists to add side effects to certain Prisma methods.
  * For example, we need to do things like...
@@ -47,6 +54,7 @@ export type ExpandedMessage = Message & {
  * - Pusher notifications
  * - Inngest notifications
  * - Other database updates that must ALWAYS happen
+ * - Indexing new listings to Algolia
  *
  * Side effects that should NOT be included here, at least for now:
  * - Validations (e.g. "you can only pay an offer with status ACCEPTED")
@@ -246,6 +254,27 @@ class PrismaSuperClient extends PrismaClient {
     });
 
     return message;
+  }
+
+  public async createListing({
+    data,
+  }: {
+    data: Prisma.ListingCreateArgs["data"];
+  }): Promise<ExpandedListing> {
+    const listing = await this.listing.create({
+      data: data,
+      include: {
+        listingUser: true,
+        mainImage: true,
+      },
+    });
+
+    await listingsIndex.saveObject({
+      objectID: listing.id,
+      ...listing,
+    });
+
+    return listing;
   }
 }
 

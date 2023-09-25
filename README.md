@@ -17,6 +17,7 @@ Here is a list of the main technologies we use:
 - [Resend](https://resend.com/) for email
 - [Segment](https://segment.com/) for analytics
 - [Mapbox](https://www.mapbox.com/) for geosearch, maps, etc.
+- [Algolia](https://dashboard.algolia.com/apps/G83PQJL6N4/dashboard) for search and recommendations
 **Coming Soon**
 - [Algolia](https://www.algolia.com/) for search
 - [Open AI](https://openai.com/) for AI stuff
@@ -106,3 +107,6 @@ We can do this using [client side uploading](https://cloudinary.com/documentatio
 
 ### Serving Photos
 We use next-cloudinary to serve the images. Responsize sizing is really tricky, but [this](https://next.cloudinary.dev/guides/responsive-images) is a great explainer on how to do it. 
+
+## Search with Algolia
+We ingest records to Algolia once per day on a cron job in Inngest, as well as upon creation of the listing in the `creatListing` method of the Prisma client. The `<SearchBar/>` component makes it easy to search for records in Algolia.

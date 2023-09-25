@@ -32,11 +32,7 @@ export async function addListing({
     });
   }
 
-  // Temporarily disabling this
-  const newListing = await prisma.listing.create({
-    include: {
-      listingUser: true,
-    },
+  const newListing = await prisma.createListing({
     data: {
       listingUserId: currentUser.id,
       title,

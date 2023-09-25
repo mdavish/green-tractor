@@ -6,6 +6,7 @@ import type { Listing } from "@prisma/client";
 import type { ExpandedOfferUpdate, ExpandedOffer } from "@/lib/prisma";
 import OfferEmail from "@/components/email/OfferEmail";
 import OfferUpdateEmail from "@/components/email/OfferUpdateEmail";
+import { indexEverything } from "../algolia";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -143,9 +144,24 @@ export const unreadMessages = inngestClient.createFunction(
   }
 );
 
+export const indexRecordsForSearch = inngestClient.createFunction(
+  {
+    name: "Index Records for Search",
+  },
+  {
+    cron: "0 0 * * *",
+  },
+  async ({ step }) => {
+    await step.run("Indexing all listings in Algolia for Search", async () => {
+      await indexEverything();
+    });
+  }
+);
+
 export const allFunctions: InngestFunction<any, any, any>[] = [
   newOffer,
   offerUpdate,
   identifyUnreadUsers,
   unreadMessages,
+  indexRecordsForSearch,
 ];

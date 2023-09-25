@@ -101,7 +101,10 @@ export default function Home() {
                 >
                   Ready to start selling?
                 </h1>
-                <Button className="w-fit mx-auto group">
+                <Button
+                  className="w-fit mx-auto group"
+                  onClick={() => signIn()}
+                >
                   Get Started Today
                   <FaArrowRight className="inline ml-2 group-hover:translate-x-1 transition-all" />
                 </Button>
