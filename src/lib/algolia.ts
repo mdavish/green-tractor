@@ -34,5 +34,7 @@ export async function indexEverything() {
 }
 
 if (require.main === module) {
+  // We only clear everything when we run this directly
+  listingsIndex.clearObjects();
   indexEverything();
 }
