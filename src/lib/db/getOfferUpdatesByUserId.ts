@@ -1,11 +1,11 @@
-import { getCurrentUser } from "../auth";
+import { getCurrentUserStrict } from "../auth";
 import { prisma } from "../prisma";
 
 export async function getOfferUpdatesByUserId(
   userId: string,
-  currentUser?: Awaited<ReturnType<typeof getCurrentUser>>
+  currentUser?: Awaited<ReturnType<typeof getCurrentUserStrict>>
 ) {
-  const resolvedCurrentUser = currentUser || (await getCurrentUser());
+  const resolvedCurrentUser = currentUser || (await getCurrentUserStrict());
 
   if (!resolvedCurrentUser) {
     throw new Error("You must be logged in to get a conversation");

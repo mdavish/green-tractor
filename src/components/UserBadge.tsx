@@ -7,7 +7,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 export default function UserBadge({ className }: { className?: string }) {
   const session = useSession();
-
   if (session.status !== "authenticated") {
     // TODO: Add loading state and error state
     return <></>;
@@ -40,7 +39,11 @@ export default function UserBadge({ className }: { className?: string }) {
       <PopoverContent className="w-fit flex flex-col gap-y-2 p-2">
         <button
           className="text-slate-900 text-sm hover:bg-slate-100 rounded-xl p-2"
-          onClick={() => signOut()}
+          onClick={() =>
+            signOut({
+              callbackUrl: "/",
+            })
+          }
         >
           Sign out
         </button>

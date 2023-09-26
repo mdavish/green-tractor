@@ -1,9 +1,8 @@
 /**
  * A conversation is the collection of both offers and messages unioned together.
  */
-
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 
 interface Conversation {
   otherUserId: string;
@@ -22,7 +21,7 @@ interface Conversation {
 }
 
 export default async function getAllConversations(): Promise<Conversation[]> {
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
   if (!currentUser) {
     throw new Error("Not authenticated");
   }

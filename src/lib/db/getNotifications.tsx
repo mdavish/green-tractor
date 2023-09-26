@@ -1,4 +1,4 @@
-import { getCurrentUser } from "../auth";
+import { getCurrentUserStrict } from "../auth";
 import { prisma } from "../prisma";
 
 export interface NotificationDetails {
@@ -20,10 +20,7 @@ export interface NotificationDetails {
 }
 
 export default async function getNotifications(): Promise<NotificationDetails> {
-  const currentUser = await getCurrentUser();
-  if (!currentUser) {
-    throw new Error("No current user found. This should never happen.");
-  }
+  const currentUser = await getCurrentUserStrict();
 
   const unreadMessagesByUser = await prisma.message.groupBy({
     by: ["fromUserId"],

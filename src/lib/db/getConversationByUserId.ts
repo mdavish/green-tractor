@@ -1,4 +1,4 @@
-import { getCurrentUser } from "../auth";
+import { getCurrentUserStrict } from "../auth";
 import { getOffersByUserId, type FetchedOffers } from "./getOffersByUserId";
 import {
   getMessagesByUserId,
@@ -42,7 +42,7 @@ export function getConversationElementTimestamp(element: ConversationElement) {
 export default async function getConversationByUserId(
   userId: string
 ): Promise<ConversationElement[]> {
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
 
   if (!currentUser) {
     throw new Error("You must be logged in to get a conversation");

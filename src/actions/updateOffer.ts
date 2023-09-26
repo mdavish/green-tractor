@@ -1,5 +1,5 @@
 "use server";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 import type { OfferUpdate } from "@prisma/client";
 import { prisma, type ExpandedOfferUpdate } from "@/lib/prisma";
 
@@ -28,7 +28,7 @@ export default async function updateOffer({
   message,
   newPrice,
 }: OfferUpdateInput): Promise<OfferUpdateReturn> {
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
   if (!currentUser) {
     throw new Error("You must be logged in to update an offer");
   }

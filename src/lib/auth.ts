@@ -3,14 +3,11 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import type { User } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
-  callbacks: {
-    async redirect({ url, baseUrl }) {
-      return "/dashboard";
-    },
-  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -27,12 +24,29 @@ export async function getCurrentSession() {
   return session;
 }
 
-export async function getCurrentUser() {
+// This function tries to fetch the current user or returns null
+export async function getCurrentUser(): Promise<User | null> {
   const session = await getServerSession(authOptions);
+
   if (!session) return null;
-  const currentUserEmail = session.user?.email!;
+
+  const currentUserEmail = session?.user?.email!;
   const currentUser = await prisma.user.findUnique({
     where: { email: currentUserEmail },
   });
-  return currentUser;
+
+  return currentUser || null;
+}
+
+// This function tries to fetch the current user or redirects
+export async function getCurrentUserStrict(
+  redirectUrl: string = "/api/auth/signin"
+): Promise<User> {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return redirect(redirectUrl);
+  }
+
+  return user;
 }

@@ -1,6 +1,6 @@
 "use server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
  * are looking at a conversation and haven't seen all the messages in it.)
  */
 export default async function markConversationSeen(otherUserId: string) {
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
   if (!currentUser) {
     throw new Error("Not logged in");
   }

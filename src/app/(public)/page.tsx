@@ -75,7 +75,16 @@ export default function HomePage() {
               >
                 Ready to start selling?
               </h1>
-              <Button className="w-fit mx-auto group" onClick={() => signIn()}>
+              <Button
+                className="w-fit mx-auto group"
+                onClick={() =>
+                  // TODO: Figure out why this isn't working??
+                  // It was working before
+                  signIn(undefined, {
+                    callbackUrl: "/dashboard",
+                  })
+                }
+              >
                 Get Started Today
                 <FaArrowRight className="inline ml-2 group-hover:translate-x-1 transition-all" />
               </Button>

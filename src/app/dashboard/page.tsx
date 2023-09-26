@@ -1,6 +1,6 @@
 import Page from "@/components/Page";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 import ListingPreview from "@/components/ListingPreview";
 
 export default async function DashboardHomePage() {
@@ -11,7 +11,7 @@ export default async function DashboardHomePage() {
       Offer: true,
     },
   });
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
 
   return (
     <Page title="Browse Listings">

@@ -1,11 +1,11 @@
 import Page from "@/components/Page";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 import ListingPreview from "@/components/ListingPreview";
 import CreateListingButton from "@/components/buttons/CreateListingButton";
 
 export default async function MyListingsPage() {
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
   if (!currentUser) throw new Error("Not authenticated");
   const listings = await prisma.listing.findMany({
     where: {

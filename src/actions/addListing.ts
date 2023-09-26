@@ -1,6 +1,6 @@
 "use server";
 import { ListingData } from "@/schemas/Listing";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import type { CloudinaryAsset } from "@prisma/client";
 import { redirect } from "next/navigation";
@@ -13,7 +13,7 @@ export async function addListing({
   startingPrice,
   title,
 }: ListingData) {
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
 
   if (!currentUser) {
     throw new Error("No current user");

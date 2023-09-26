@@ -15,10 +15,12 @@ export default function SearchBar({
   className,
   inputClassName,
   placeholder = "Search the marketplace...",
+  showAutocomplete = true,
 }: {
   className?: string;
   inputClassName?: string;
   placeholder?: string;
+  showAutocomplete?: boolean;
 }) {
   const { query, refine } = useSearchBox();
   const { hits } = useHits<AlgoliaListingResponse>();
@@ -53,9 +55,13 @@ export default function SearchBar({
 
     if (e.key === "Enter") {
       e.preventDefault();
-      if (selectedIndex === undefined) return;
-      if (hits[selectedIndex] === undefined) return;
-      router.push(`/listings/${hits[selectedIndex]?.objectID}`);
+      if (selectedIndex === undefined || hits[selectedIndex] === undefined) {
+        router.push(
+          `/search?listings_index%5Bquery%5D=${encodeURIComponent(query)}`
+        );
+      } else {
+        router.push(`/listings/${hits[selectedIndex]?.objectID}`);
+      }
     }
 
     if (e.key === "Escape") {
@@ -73,15 +79,17 @@ export default function SearchBar({
         onKeyDown={handleKeyDown}
         onChange={(e) => refine(e.target.value)}
         className={cn(
-          "w-full border border-slate-200 rounded-full py-3 px-5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
+          "w-full border border-slate-200 rounded-full py-3 px-5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent shadow-sm focus:shadow-md transition-all duration-200 ease-in-out",
           inputClassName
         )}
         placeholder={placeholder}
       />
       <button
-        onClick={
-          () => router.push(`/search?q=${query}`) // TODO: Add search page
-        }
+        onClick={() => {
+          router.push(
+            `/search?listings_index%5Bquery%5D=${encodeURIComponent(query)}`
+          );
+        }}
         className="absolute right-3 top-3"
       >
         <FaMagnifyingGlass className="text-primary" />
@@ -111,11 +119,17 @@ export default function SearchBar({
                   />
                   <div className="grow flex flex-col gap-y-1 my-auto w-fit">
                     <Highlight
+                      classNames={{
+                        highlighted: "font-medium bg-slate-200",
+                      }}
                       className="line-clamp-1 overflow-ellipsis text-sm"
                       attribute="title"
                       hit={hit}
                     />
                     <Highlight
+                      classNames={{
+                        highlighted: "font-medium bg-slate-200",
+                      }}
                       className="line-clamp-1 overflow-ellipsis text-slate-700 text-xs"
                       attribute="description"
                       hit={hit}

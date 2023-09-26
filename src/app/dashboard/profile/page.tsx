@@ -3,13 +3,13 @@ import Page from "@/components/Page";
 import { StateSchema, type State } from "@/schemas/State";
 import SectionHeader from "@/components/SectionHeader";
 import StripeEmptyState from "@/components/StripeEmptyState";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FaCheckCircle } from "react-icons/fa";
 import stripeClient from "@/lib/stripe";
 
 export default async function ProfilePage() {
-  const user = await getCurrentUser();
+  const user = await getCurrentUserStrict();
 
   if (!user) {
     throw new Error("User not found");

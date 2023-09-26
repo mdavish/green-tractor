@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { getServerSession } from "next-auth";
-import { authOptions, getCurrentUser } from "@/lib/auth";
+import { authOptions, getCurrentUserStrict } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Navigation from "@/components/Navigation";
 import getNotifications from "@/lib/db/getNotifications";
@@ -12,18 +12,8 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
   const notifications = await getNotifications();
-
-  if (!session) {
-    redirect("/");
-  }
-
-  if (!currentUser) {
-    throw new Error(
-      "No current user found. This should never happen because there's a session."
-    );
-  }
 
   if (!session) {
     throw new Error("No session found. This should never happen.");

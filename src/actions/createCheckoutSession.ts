@@ -1,7 +1,7 @@
 "use server";
 import stripeClient from "@/lib/stripe";
 import type Stripe from "stripe";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 import { FetchedOfferUpdateWithType } from "@/lib/db/getConversationByUserId";
 import { prisma } from "@/lib/prisma";
 
@@ -26,7 +26,7 @@ export default async function createCheckoutSession({
   successUrl: string;
   cancelUrl: string;
 }): Promise<CheckoutSessionReturn> {
-  const user = await getCurrentUser();
+  const user = await getCurrentUserStrict();
 
   if (!user) {
     throw new Error("You must be logged in to make a purchase");

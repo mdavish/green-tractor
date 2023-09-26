@@ -1,6 +1,6 @@
 "use server";
 import { pusherServer } from "@/lib/pusher";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 
 export default async function startStopTyping({
   isTyping,
@@ -9,7 +9,7 @@ export default async function startStopTyping({
   isTyping: boolean;
   otherUserId: string;
 }) {
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
   if (!currentUser) return;
   const channel = pusherServer.getTwoWayChannel(currentUser.id, otherUserId);
   await pusherServer.typedTrigger({

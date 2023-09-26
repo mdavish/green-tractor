@@ -31,7 +31,7 @@ interface OfferButtonProps {
   listing: Listing & {
     listingUser: User;
   };
-  currentUser: User;
+  currentUser?: User; // This is optional because the user may not be logged in
   buttonClassName?: string;
 }
 
@@ -50,7 +50,7 @@ export default function OfferButton({
     },
   });
 
-  const listingIsTheirs = listing.listingUser.id === currentUser.id;
+  const listingIsTheirs = listing.listingUser.id === currentUser?.id;
 
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -78,6 +78,8 @@ export default function OfferButton({
       }
     });
   };
+
+  // TODO: Display a totally different modal that gets the user to sign in if they aren't logged in
 
   return (
     <Dialog open={showDialog} defaultOpen={false} onOpenChange={setShowDialog}>

@@ -1,5 +1,5 @@
 "use server";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function sendMessage({
@@ -9,7 +9,7 @@ export default async function sendMessage({
   message: string;
   toUserId: string;
 }) {
-  const user = await getCurrentUser();
+  const user = await getCurrentUserStrict();
   if (!user) {
     throw new Error("You must be logged in to send a message");
   }

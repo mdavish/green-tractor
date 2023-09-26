@@ -1,14 +1,14 @@
 "use server";
 import stripe from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 
 export default async function setupStripe() {
   // Every time a user signs in, we check if their Stripe account exists
   // If it doesn't, we create one and redirect them to the onboarding flow
   // If it does, they can sign in
 
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
 
   if (!currentUser) {
     throw new Error(

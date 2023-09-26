@@ -19,7 +19,7 @@ import Logo from "./Logo";
 import { useNotifications } from "./providers/NotificationsProvider";
 import NotificationBadge from "./NotificationBadge";
 
-interface NavItem {
+export interface NavItem {
   name: string;
   href: string;
   icon: React.ReactNode;
@@ -27,12 +27,9 @@ interface NavItem {
   unreadNotifications?: number;
 }
 
-export default function Navigation({ className }: { className?: string }) {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  const router = useRouter();
+//TODO: Eventually turn this into something that the DashboardMenuPopover component can use
+export function useNavItems(): NavItem[] {
   const { notifications } = useNotifications();
-
   const navItems: NavItem[] = [
     {
       name: "Home",
@@ -66,6 +63,15 @@ export default function Navigation({ className }: { className?: string }) {
       onMobile: true,
     },
   ];
+  return navItems;
+}
+
+export default function Navigation({ className }: { className?: string }) {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const { notifications } = useNotifications();
+  const navItems = useNavItems();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {

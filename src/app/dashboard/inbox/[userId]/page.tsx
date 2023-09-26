@@ -1,6 +1,6 @@
 import getConversationByUserId from "@/lib/db/getConversationByUserId";
 import ConversationPanel from "@/components/messaging/ConversationPanel";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 import getUserById from "@/lib/db/getUserById";
 import markConversationSeen from "@/actions/markConversationSeen";
 
@@ -14,7 +14,7 @@ export default async function ConversationPage({ params: { userId } }: Params) {
   // Right now, conversations are just lists of offers
   // In the future, they will be a union of offers and messages and other things
   const conversation = await getConversationByUserId(userId);
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
   await markConversationSeen(userId);
   if (!currentUser) {
     throw new Error("No current user");

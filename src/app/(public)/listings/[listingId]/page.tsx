@@ -1,6 +1,6 @@
 import Page from "@/components/Page";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUserStrict } from "@/lib/auth";
 import type { Metadata } from "next";
 import SectionHeader from "@/components/SectionHeader";
 import FarmerPreview from "@/components/FarmerPreview";
@@ -50,7 +50,7 @@ export default async function ListingDetail({ params: { listingId } }: Params) {
     },
   });
 
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUserStrict();
   const isOwner = listing?.listingUserId === currentUser?.id;
   const currentUserHasOffered = listing?.Offer.some(
     (offer) => offer.offerUserId === currentUser?.id
@@ -64,7 +64,7 @@ export default async function ListingDetail({ params: { listingId } }: Params) {
 
   return (
     <Page title={listing.title} maxWidth={false}>
-      <div className="flex flex-col md:flex-row md:gap-x-10 max-w-5xl">
+      <div className="flex flex-col mr-auto  md:flex-row md:gap-x-10 max-w-5xl">
         <ResponsiveImage
           cloudinaryPublicId={listing.mainImage?.public_id}
           alt={`Image of ${listing.title}}`}

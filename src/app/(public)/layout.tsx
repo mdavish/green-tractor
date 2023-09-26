@@ -10,6 +10,7 @@ import { algoliaClient } from "@/lib/algolia";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import SearchBar from "@/components/SearchBar";
+import DashboardDropdownMenu from "@/components/DashboardDropdownMenu";
 
 const patuaOne = Patua_One({
   weight: "400",
@@ -22,6 +23,7 @@ export default function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const session = useSession();
   return (
     <main className="min-h-screen flex flex-col">
       <InstantSearch searchClient={algoliaClient} indexName="listings_index">
@@ -46,10 +48,17 @@ export default function PublicLayout({
           <SearchBar
             placeholder="Search..."
             className="md:shrink-0 md:basis-2/5"
-          />
-          <Button className="w-fit whitespace-nowrap " onClick={() => signIn()}>
-            Sign In
-          </Button>
+          />{" "}
+          {session.status !== "authenticated" ? (
+            <Button
+              className="w-fit whitespace-nowrap "
+              onClick={() => signIn()}
+            >
+              Sign In
+            </Button>
+          ) : (
+            <DashboardDropdownMenu session={session.data} />
+          )}
         </nav>
       </InstantSearch>
       {children}
